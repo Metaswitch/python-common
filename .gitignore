@@ -1,0 +1,12 @@
+*.egg-info
+.coverage
+.buildout_downloads
+*.pyc
+*~
+.installed.cfg
+_env
+bin
+bootstrap.py
+develop-eggs
+eggs
+htmlcov
