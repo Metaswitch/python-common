@@ -34,8 +34,7 @@
 
 
 def generate_ifcs(domain):
-    return ('<?xml version="1.0" encoding="UTF-8"?>'
-            '<ServiceProfile>'
+    return ('<ServiceProfile>'
               '<InitialFilterCriteria>'
                 '<TriggerPoint>'
                   '<ConditionTypeCNF>0</ConditionTypeCNF>'
