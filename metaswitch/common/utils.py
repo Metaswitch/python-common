@@ -45,6 +45,8 @@ import traceback
 import phonenumbers
 import hashlib
 import bcrypt
+import time
+import signal
 from urllib import quote
 from Crypto.Cipher import Blowfish
 
@@ -415,3 +417,30 @@ def daemonize(filename):
             sys.exit(0)
     except OSError, e:
         sys.exit(1)
+
+def write_core_file(process_name, contents):
+    """
+    Writes contents to a "core" file named by the process and the current timestamp.
+    """
+    filename = "/var/clearwater-diags-monitor/tmp/core.%s.%u" % (process_name, time.time())
+    try:
+        # We use a mode of "a" to append if multiple stacks are dumped simultaneously (e.g.
+        # from multiple processes).
+        with open(filename, "a") as stack_file:
+            stack_file.write(contents)
+    except IOError:
+        # The most likely reason for failure is that clearwater-diags-monitor isn't installed
+        # so the dump directory doesn't exist.
+        _log.exception("Can't dump core - is clearwater-diags-monitor installed?")
+
+def install_sigusr1_handler(process_name):
+    """
+    Install SIGUSR1 handler to dump stack."
+    """
+    def sigusr1_handler(sig, stack):
+        """
+        Handle SIGUSR1 by dumping stack and terminating.
+        """
+        stack_dump = "Caught SIGUSR1\n" + "".join(traceback.format_stack(stack))
+        write_core_file(process_name, stack_dump)
+    signal.signal(signal.SIGUSR1, sigusr1_handler)
