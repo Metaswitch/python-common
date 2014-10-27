@@ -35,12 +35,13 @@ else
 	ARCHFLAGS="-arch i386 -arch x86_64" ./bin/buildout -N
 endif
 
-bin/buildout: $(ENV_DIR)/bin/python bootstrap.py
+bin/buildout: $(ENV_DIR)/bin/python
 	mkdir -p .buildout_downloads/dist
-	$(ENV_DIR)/bin/python bootstrap.py
-
-bootstrap.py:
-	curl -S -s -O http://python-distribute.org/bootstrap.py
+	$(ENV_DIR)/bin/easy_install "setuptools>0.7"
+	$(ENV_DIR)/bin/easy_install distribute
+	$(ENV_DIR)/bin/easy_install zc.buildout
+	mkdir -p bin/
+	ln -s $(ENV_DIR)/bin/buildout bin/
 
 $(ENV_DIR)/bin/python:
 	virtualenv --no-site-packages --distribute --python=$(PYTHON_BIN) $(ENV_DIR)
