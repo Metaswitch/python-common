@@ -44,7 +44,7 @@ bin/buildout: $(ENV_DIR)/bin/python
 	ln -s $(ENV_DIR)/bin/buildout bin/
 
 $(ENV_DIR)/bin/python:
-	virtualenv --no-site-packages --distribute --python=$(PYTHON_BIN) $(ENV_DIR)
+	virtualenv --no-site-packages --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
 
 .PHONY: clean
 clean: envclean pyclean
