@@ -32,11 +32,43 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-
-import os
-import logging
-import logging.handlers
 import time
+import os, sys, traceback
+from datetime import datetime
+import logging
+from logging.handlers import BaseRotatingHandler
+
+def getCurrentFilename(currentTime, log_dir, prefix):
+    filename = "{prefix}_{year}{month:02}{day:02}T{hour:02}0000Z.txt".format(prefix=prefix,
+                                                                             year=currentTime.year,
+                                                                             month=currentTime.month,
+                                                                             day=currentTime.day,
+                                                                             hour=currentTime.hour)
+    return os.path.join(log_dir, filename)
+
+class ClearwaterLogHandler(BaseRotatingHandler):
+    def __init__(self, log_directory, logfile_prefix):
+        BaseRotatingHandler.__init__(self, "", 'a', encoding=None, delay=True)
+        self._log_directory = log_directory
+        self._logfile_prefix = logfile_prefix
+        self.doRollover()
+
+    def shouldRollover(self, record):
+        now = int(time.time()) 
+        return (now > self.next_file_change)
+
+    def doRollover(self):
+        tmpstream = self.stream
+        self.stream = None
+        if tmpstream:
+            tmpstream.close()
+        currentTime = int(time.time())
+        self.baseFilename = getCurrentFilename(datetime.fromtimestamp(currentTime),
+                                               self._log_directory,
+                                               self._logfile_prefix)
+        self.stream = os.fdopen(os.open(self.baseFilename, os.O_WRONLY | os.O_CREAT, 0644), self.mode)
+        self.next_file_change = (int(currentTime / 3600) * 3600) + 3600
+
 
 def configure_logging(task_id, settings):
     # Configure the root logger to accept all messages. We control the log level
@@ -45,13 +77,21 @@ def configure_logging(task_id, settings):
     root_log.setLevel(logging.DEBUG)
     for h in root_log.handlers:
         root_log.removeHandler(h)
-    fmt = logging.Formatter('%(asctime)s UTC %(levelname)s %(module)s:%(lineno)d %(message)s')
+    fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
     fmt.converter = time.gmtime
-    log_file = os.path.join(settings.LOGS_DIR,
-                            "%(prefix)s-%(task_id)s.log" % {"prefix": settings.LOG_FILE_PREFIX, "task_id": task_id})
-    handler = logging.handlers.RotatingFileHandler(log_file,
-                                                   backupCount=settings.LOG_BACKUP_COUNT,
-                                                   maxBytes=settings.LOG_FILE_MAX_BYTES)
+    handler = ClearwaterLogHandler(settings.LOGS_DIR, task_id)
     handler.setFormatter(fmt)
     handler.setLevel(settings.LOG_LEVEL)
     root_log.addHandler(handler)
+    
+    def exception_logging_handler(type, value, tb):
+        root_log = logging.getLogger()
+        root_log.error("""Uncaught exception:
+  Exception: {0}
+  Detail: {1}
+  Traceback:
+  {2}""".format(str(type.__name__), str(value), "".join(traceback.format_tb(tb))))
+        sys.__excepthook__(type, value, tb)
+
+    # Install exception handler
+    sys.excepthook = exception_logging_handler
