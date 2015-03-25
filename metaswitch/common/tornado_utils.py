@@ -1,5 +1,3 @@
-# @file setup.py
-#
 # Project Clearwater - IMS in the Cloud
 # Copyright (C) 2013  Metaswitch Networks Ltd
 #
@@ -33,25 +31,40 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 import logging
-import sys
+from tornado import ioloop
+import threading
+import traceback
 
-from setuptools import setup, find_packages
-from logging import StreamHandler
+_log = logging.getLogger("metaswitch.utils")
 
-_log = logging.getLogger("common")
-_log.setLevel(logging.DEBUG)
-_handler = StreamHandler(sys.stderr)
-_handler.setLevel(logging.DEBUG)
-_log.addHandler(_handler)
+_main_thread = None
+_thread_violation = False
 
-_log.info("Packages %s", find_packages('.'))
+def assert_main_thread():
+    global _main_thread
+    global _thread_violation
+    my_thread = threading.current_thread().ident
+    if _main_thread is not None:
+        if my_thread != _main_thread:
+            try:
+                _thread_violation = True
+                raise AssertionError("This function should only be called from the main thread")
+            except:
+                _log.exception("This function should only be called form the main thread")
+                raise
+    else:
+        # We don't know what the main thread is yet.  Queue up an action on
+        # the main thread to save it off and then check this thread was
+        # correct.
+        my_stack = traceback.format_stack()
+        def _set_main_thread():
+            global _main_thread
+            global _thread_violation
+            _main_thread = threading.current_thread().ident
+            if my_thread != _main_thread:
+                _thread_violation = True
+                raise AssertionError("This function should only be called "
+                                     "from the main thread.  Original stack:\n" +
+                                     "".join(my_stack))
+        ioloop.IOLoop.instance().add_callback(_set_main_thread)
 
-setup(
-    name='metaswitchcommon',
-    version='0.1',
-    packages=find_packages('.'),
-    package_dir={'':'.'},
-    test_suite='metaswitch.common.test',
-    install_requires=["py-bcrypt"],
-    tests_require["Mock"]
-    )

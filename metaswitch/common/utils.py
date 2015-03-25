@@ -39,10 +39,8 @@ import logging
 import math
 import binascii
 import base64
-from tornado import ioloop
 import threading
 import traceback
-import phonenumbers
 import hashlib
 import bcrypt
 import time
@@ -189,37 +187,6 @@ def generate_secure_random_bytes(buffer_size=URANDOM_BUFFER_SIZE):
         for x in bytes:
             yield ord(x)
 
-_main_thread = None
-_thread_violation = False
-
-def assert_main_thread():
-    global _main_thread
-    global _thread_violation
-    my_thread = threading.current_thread().ident
-    if _main_thread is not None:
-        if my_thread != _main_thread:
-            try:
-                _thread_violation = True
-                raise AssertionError("This function should only be called from the main thread")
-            except:
-                _log.exception("This function should only be called form the main thread")
-                raise
-    else:
-        # We don't know what the main thread is yet.  Queue up an action on
-        # the main thread to save it off and then check this thread was
-        # correct.
-        my_stack = traceback.format_stack()
-        def _set_main_thread():
-            global _main_thread
-            global _thread_violation
-            _main_thread = threading.current_thread().ident
-            if my_thread != _main_thread:
-                _thread_violation = True
-                raise AssertionError("This function should only be called "
-                                     "from the main thread.  Original stack:\n" +
-                                     "".join(my_stack))
-        ioloop.IOLoop.instance().add_callback(_set_main_thread)
-
 def sip_uri_to_phone_number(sip_uri):
     match = re.match(_SIP_URI_REGEXP, sip_uri)
     if match:
@@ -233,17 +200,6 @@ def sip_uri_to_domain(sip_uri):
         return match.group("domain")
     else:
         return "Unknown"
-
-def format_phone_number(number):
-    try:
-        # TODO support non-US
-        numobj = phonenumbers.parse(number, "US")
-        number = phonenumbers.format_number(numobj,
-                                            phonenumbers.PhoneNumberFormat.NATIONAL)
-    except Exception:
-        return number
-    return number
-
 
 def sip_lists_to_phone_list(list_of_sip_numbers):
     return [sip_uri_to_phone_number(x)
