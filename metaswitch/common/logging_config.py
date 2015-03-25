@@ -70,7 +70,7 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self.next_file_change = (int(currentTime / 3600) * 3600) + 3600
 
 
-def configure_logging(task_id, log_level, log_dir, log_prefix, task_id=None):
+def configure_logging(log_level, log_dir, log_prefix, task_id=None):
     if task_id:
         log_prefix += "-{}".format(task_id)
 
