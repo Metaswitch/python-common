@@ -1,5 +1,3 @@
-# @file setup.py
-#
 # Project Clearwater - IMS in the Cloud
 # Copyright (C) 2013  Metaswitch Networks Ltd
 #
@@ -32,26 +30,15 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-import logging
-import sys
+import phonenumbers
 
-from setuptools import setup, find_packages
-from logging import StreamHandler
+def format_phone_number(number):
+    try:
+        # TODO support non-US
+        numobj = phonenumbers.parse(number, "US")
+        number = phonenumbers.format_number(numobj,
+                                            phonenumbers.PhoneNumberFormat.NATIONAL)
+    except Exception:
+        return number
+    return number
 
-_log = logging.getLogger("common")
-_log.setLevel(logging.DEBUG)
-_handler = StreamHandler(sys.stderr)
-_handler.setLevel(logging.DEBUG)
-_log.addHandler(_handler)
-
-_log.info("Packages %s", find_packages('.'))
-
-setup(
-    name='metaswitchcommon',
-    version='0.1',
-    packages=find_packages('.'),
-    package_dir={'':'.'},
-    test_suite='metaswitch.common.test',
-    install_requires=["py-bcrypt", "pycrypto"],
-    tests_require=["Mock"]
-    )

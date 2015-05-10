@@ -70,18 +70,23 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self.next_file_change = (int(currentTime / 3600) * 3600) + 3600
 
 
-def configure_logging(task_id, settings):
+def configure_logging(log_level, log_dir, log_prefix, task_id=None):
+    if task_id:
+        log_prefix += "-{}".format(task_id)
+
     # Configure the root logger to accept all messages. We control the log level
     # through the handler attached to it (see below).
     root_log = logging.getLogger()
     root_log.setLevel(logging.DEBUG)
     for h in root_log.handlers:
         root_log.removeHandler(h)
+
+
     fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
     fmt.converter = time.gmtime
-    handler = ClearwaterLogHandler(settings.LOGS_DIR, task_id)
+    handler = ClearwaterLogHandler(log_dir, log_prefix)
     handler.setFormatter(fmt)
-    handler.setLevel(settings.LOG_LEVEL)
+    handler.setLevel(log_level)
     root_log.addHandler(handler)
     
     def exception_logging_handler(type, value, tb):
