@@ -54,7 +54,7 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self.doRollover()
 
     def shouldRollover(self, record):
-        now = int(time.time()) 
+        now = int(time.time())
         return (now > self.next_file_change)
 
     def doRollover(self):
@@ -70,7 +70,7 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self.next_file_change = (int(currentTime / 3600) * 3600) + 3600
 
 
-def configure_logging(log_level, log_dir, log_prefix, task_id=None):
+def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=False):
     if task_id:
         log_prefix += "-{}".format(task_id)
 
@@ -81,14 +81,17 @@ def configure_logging(log_level, log_dir, log_prefix, task_id=None):
     for h in root_log.handlers:
         root_log.removeHandler(h)
 
+    if show_thread:
+        fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d (thread %(threadName)s): %(message)s', "%d-%m-%Y %H:%M:%S")
+    else:
+        fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
 
-    fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
     fmt.converter = time.gmtime
     handler = ClearwaterLogHandler(log_dir, log_prefix)
     handler.setFormatter(fmt)
     handler.setLevel(log_level)
     root_log.addHandler(handler)
-    
+
     def exception_logging_handler(type, value, tb):
         root_log = logging.getLogger()
         root_log.error("""Uncaught exception:
