@@ -47,7 +47,7 @@ class PDLog(object):
         self._text = ("Description: {}. "+
                       "@@Cause: {}. "+
                       "@@Effect: {}. "+
-                      "@@Action:  {}.").format(desc, cause, effect, action)
+                      "@@Action: {}.").format(desc, cause, effect, action)
         self._priority = priority
 
     def log(self, **kwargs):

@@ -46,7 +46,9 @@ class PDLogTestCase(unittest.TestCase):
                          action="Check if this test passes",
                          priority=PDLog.LOG_NOTICE)
         TEST_LOG.log(acronym="ENT")
-        mock_syslog.assert_called_with(PDLog.LOG_NOTICE, "Description: This is a test log. @@Cause: A test has been run. @@Effect: You will be confident that ENT logs work. @@Action:  Check if this test passes.")
+        expected_text = "Description: This is a test log. @@Cause: A test has been run. "+\
+            "@@Effect: You will be confident that ENT logs work. @@Action: Check if this test passes."
+        mock_syslog.assert_called_with(PDLog.LOG_NOTICE, expected_text)
 
 
     @mock.patch("syslog.syslog")
@@ -57,4 +59,6 @@ class PDLogTestCase(unittest.TestCase):
                          action="Check if this test passes",
                          priority=PDLog.LOG_NOTICE)
         TEST_LOG.log()
-        mock_syslog.assert_called_with(PDLog.LOG_NOTICE, "Description: This is a test log. @@Cause: A test has been run. @@Effect: You will be confident that PD logs work. @@Action:  Check if this test passes.")
+        expected_text = "Description: This is a test log. @@Cause: A test has been run. "+\
+            "@@Effect: You will be confident that PD logs work. @@Action: Check if this test passes."
+        mock_syslog.assert_called_with(PDLog.LOG_NOTICE, expected_text)
