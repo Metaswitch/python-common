@@ -30,14 +30,30 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-def PDLog(object):
-    def __init__(self, procname, desc, cause, effect, action, priority):
-        self._procname = procname
-        self._text = "Description: {}. @@Cause: {}. @@Effect: {}. @@Action:  {}.".
-                     format(desc, cause, effect, action)
+import syslog
+
+class PDLog(object):
+    """Class for defining and making problem determination logs."""
+    LOG_NOTICE = syslog.LOG_NOTICE
+    LOG_ERR = syslog.LOG_ERR
+
+    def __init__(self, desc, cause, effect, action, priority):
+        """Defines a particular log's priority and log text.
+
+        The desc, cause, effect and action strings can have named format string
+        parameters, which will be filled in when log{} is called.
+
+        The priority mist be LOG_NOTICE or LOG_ERR."""
+        self._text = ("Description: {}. "+
+                      "@@Cause: {}. "+
+                      "@@Effect: {}. "+
+                      "@@Action:  {}.").format(desc, cause, effect, action)
         self._priority = priority
 
     def log(self, **kwargs):
-        syslog.openlog(self._procname, syslog.LOG_PID, syslog.LOG_LOCAL6)
+        """Logs out the description/cause/effect/action to syslog, including
+        named format parameters.
+
+        Note that users should call syslog.openlog before calling this function,
+        to set an appropriate process name."""
         syslog.syslog(self._priority, self._text.format(**kwargs))
-        syslog.closelog()
