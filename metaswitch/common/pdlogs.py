@@ -54,10 +54,10 @@ class PDLog(object):
         parameters, which will be filled in when log{} is called.
 
         The priority mist be LOG_NOTICE or LOG_ERR."""
-        self._text = ("{} - Description: {}. "+
-                      "@@Cause: {}. "+
-                      "@@Effect: {}. "+
-                      "@@Action: {}.").format(number, desc, cause, effect, action)
+        self._text = ("{} - Description: {} "+
+                      "@@Cause: {} "+
+                      "@@Effect: {} "+
+                      "@@Action: {}").format(number, desc, cause, effect, action)
         self._priority = priority
 
     def log(self, **kwargs):
