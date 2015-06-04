@@ -37,17 +37,27 @@ class PDLog(object):
     LOG_NOTICE = syslog.LOG_NOTICE
     LOG_ERR = syslog.LOG_ERR
 
-    def __init__(self, desc, cause, effect, action, priority):
+    CL_CPP_COMMON_ID = 1000
+    CL_SPROUT_ID = 2000
+    CL_CHRONOS_ID = 3000
+    CL_HOMESTEAD_ID = 4000
+    CL_RALF_ID = 5000
+    CL_SCRIPT_ID = 6000
+    CL_ASTAIRE_ID = 7000
+    CL_CLUSTER_MGR_ID = 8000
+    CL_CONFIG_MGR_ID = 9000
+
+    def __init__(self, number, desc, cause, effect, action, priority):
         """Defines a particular log's priority and log text.
 
         The desc, cause, effect and action strings can have named format string
         parameters, which will be filled in when log{} is called.
 
         The priority mist be LOG_NOTICE or LOG_ERR."""
-        self._text = ("Description: {}. "+
+        self._text = ("{} - Description: {}. "+
                       "@@Cause: {}. "+
                       "@@Effect: {}. "+
-                      "@@Action: {}.").format(desc, cause, effect, action)
+                      "@@Action: {}.").format(number, desc, cause, effect, action)
         self._priority = priority
 
     def log(self, **kwargs):
