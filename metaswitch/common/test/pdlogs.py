@@ -40,25 +40,27 @@ from metaswitch.common.pdlogs import PDLog
 class PDLogTestCase(unittest.TestCase):
     @mock.patch("syslog.syslog")
     def testLogWithParams(self, mock_syslog):
-        TEST_LOG = PDLog(desc="This is a test log",
-                         cause="A test has been run",
-                         effect="You will be confident that {acronym} logs work",
-                         action="Check if this test passes",
+        TEST_LOG = PDLog(100,
+                         desc="This is a test log.",
+                         cause="A test has been run.",
+                         effect="You will be confident that {acronym} logs work.",
+                         action="Check if this test passes.",
                          priority=PDLog.LOG_NOTICE)
         TEST_LOG.log(acronym="ENT")
-        expected_text = "Description: This is a test log. @@Cause: A test has been run. "+\
+        expected_text = "100 - Description: This is a test log. @@Cause: A test has been run. "+\
             "@@Effect: You will be confident that ENT logs work. @@Action: Check if this test passes."
         mock_syslog.assert_called_with(PDLog.LOG_NOTICE, expected_text)
 
 
     @mock.patch("syslog.syslog")
     def testLogWithoutParams(self, mock_syslog):
-        TEST_LOG = PDLog(desc="This is a test log",
-                         cause="A test has been run",
-                         effect="You will be confident that PD logs work",
-                         action="Check if this test passes",
+        TEST_LOG = PDLog(101,
+                         desc="This is a test log.",
+                         cause="A test has been run.",
+                         effect="You will be confident that PD logs work.",
+                         action="Check if this test passes.",
                          priority=PDLog.LOG_NOTICE)
         TEST_LOG.log()
-        expected_text = "Description: This is a test log. @@Cause: A test has been run. "+\
+        expected_text = "101 - Description: This is a test log. @@Cause: A test has been run. "+\
             "@@Effect: You will be confident that PD logs work. @@Action: Check if this test passes."
         mock_syslog.assert_called_with(PDLog.LOG_NOTICE, expected_text)
