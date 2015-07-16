@@ -54,6 +54,6 @@ except ImportError:
     _log.error("Could not import /usr/share/clearwater/bin/alarms.py, alarms will not be sent")
 
 
-def issue_alarm(identifier):
+def issue_alarm(process, identifier):
     if sendrequest:
-        sendrequest(["issue-alarm", "cluster-manager", identifier])
+        sendrequest(["issue-alarm", process, identifier])

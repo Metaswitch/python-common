@@ -43,17 +43,17 @@ class CMTestCase(unittest.TestCase):
     @mock.patch("metaswitch.common.comm_monitor.monotonic_time")
     def test_simple(self, mock_time, mock_alarm):
         """Simple test of basic behaviour."""
-        cm = CommunicationMonitor("raise", "clear")
+        cm = CommunicationMonitor("ut", "raise", "clear")
 
         # Move time forwards and report a failure. We should raise an alarm.
         mock_time.return_value = 1000
         cm.inform_failure()
-        mock_alarm.assert_called_with("raise")
+        mock_alarm.assert_called_with("ut", "raise")
 
         # Move time forwards and report a success. We should clear that alarm.
         mock_time.return_value = 3000
         cm.inform_success()
-        mock_alarm.assert_called_with("clear")
+        mock_alarm.assert_called_with("ut", "clear")
 
 
 if __name__ == "__main__":
