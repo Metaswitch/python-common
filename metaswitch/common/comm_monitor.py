@@ -52,12 +52,12 @@ class CommunicationMonitor(object):
 
     def set_alarm(self):
         self.alarmed = True
-        _log.debug("Raising alarm {}".format(self._raise_identifier))
+        _log.warning("Raising alarm {}".format(self._raise_identifier))
         issue_alarm(self._process, self._raise_identifier)
 
     def clear_alarm(self):
         self.alarmed = False
-        _log.debug("Clearing alarm {}".format(self._clear_identifier))
+        _log.warning("Clearing alarm {}".format(self._clear_identifier))
         issue_alarm(self._process, self._clear_identifier)
 
     def update_alarm_state(self):
