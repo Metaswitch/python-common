@@ -52,16 +52,21 @@ class CommunicationMonitor(object):
 
     def set_alarm(self):
         self.alarmed = True
+        _log.debug("Raising alarm {}".format(self._raise_identifier))
         issue_alarm(self._process, self._raise_identifier)
 
     def clear_alarm(self):
         self.alarmed = False
+        _log.debug("Clearing alarm {}".format(self._clear_identifier))
         issue_alarm(self._process, self._clear_identifier)
 
     def update_alarm_state(self):
         now = monotonic_time()
         with self.mutex:
+            _log.debug("alarmed is {}, now is {}, next check time is {}, succeeded is {}, failed is {}"
+                       .format(self.alarmed, now, self._next_check, self.succeeded, self.failed))
             if (now > self._next_check):
+                _log.debug("Checking alarm state")
                 if not self.alarmed:
                     if self.succeeded == 0 and self.failed > 0:
                         self.set_alarm()

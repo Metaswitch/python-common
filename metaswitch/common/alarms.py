@@ -39,21 +39,22 @@
 
 
 import logging
-from threading import Thread, Condition
 import imp
 
 _log = logging.getLogger(__name__)
 
 sendrequest = None
 
-try:
-    file, pathname, description = imp.find_module("alarms", ["/usr/share/clearwater/bin"])
-    mod = imp.load_module("alarms", file, pathname, description)
-    sendrequest = mod.sendrequest
-except ImportError:
-    _log.error("Could not import /usr/share/clearwater/bin/alarms.py, alarms will not be sent")
-
-
 def issue_alarm(process, identifier):
+    global sendrequest
+    if sendrequest is None:
+        try:
+            file, pathname, description = imp.find_module("alarms", ["/usr/share/clearwater/bin"])
+            mod = imp.load_module("alarms", file, pathname, description)
+            sendrequest = mod.sendrequest
+            _log.info("Imported /usr/share/clearwater/bin/alarms.py")
+        except ImportError:
+            _log.error("Could not import /usr/share/clearwater/bin/alarms.py, alarms will not be sent")
+
     if sendrequest:
         sendrequest(["issue-alarm", process, identifier])
