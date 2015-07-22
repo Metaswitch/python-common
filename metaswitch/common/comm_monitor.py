@@ -63,7 +63,7 @@ class CommunicationMonitor(object):
     def update_alarm_state(self):
         now = monotonic_time()
         with self.mutex:
-            _log.debug("alarmed is {}, now is {}, next check time is {}, succeeded is {}, failed is {}"
+            _log.debug("Deciding whether to change alarm state - alarmed is {}, now is {}, next check time is {}, succeeded count is {}, failed count is {}"
                        .format(self.alarmed, now, self._next_check, self.succeeded, self.failed))
             if (now > self._next_check):
                 _log.debug("Checking alarm state")
