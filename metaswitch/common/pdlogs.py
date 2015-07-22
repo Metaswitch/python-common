@@ -46,6 +46,8 @@ class PDLog(object):
     CL_ASTAIRE_ID = 7000
     CL_CLUSTER_MGR_ID = 8000
     CL_CONFIG_MGR_ID = 9000
+    # Ranges 10000 to 11999 are reserved
+    CL_PYTHON_COMMON_ID = 12000
 
     def __init__(self, number, desc, cause, effect, action, priority):
         """Defines a particular log's priority and log text.
@@ -67,3 +69,21 @@ class PDLog(object):
         Note that users should call syslog.openlog before calling this function,
         to set an appropriate process name."""
         syslog.syslog(self._priority, self._text.format(**kwargs))
+
+CONNECTION_LOST = PDLog(
+    number=PDLog.CL_PYTHON_COMMON_ID + 1,
+    desc="The connection to Cassandra has been lost.",
+    cause="The connection to Cassandra has been lost.",
+    effect="The node can no long offer services that rely on Cassandra.",
+    action="(1). Check that Cassandra is running on the node. " +\
+      "(2). Check that the configuration files in /etc/clearwater are correct. " +\
+      "(3). Check the right ports are open for Cassandra connectivity.",
+    priority=PDLog.LOG_ERR)
+
+CONNECTION_RECOVERED = PDLog(
+    number=PDLog.CL_PYTHON_COMMON_ID + 2,
+    desc="The connection to Cassandra has recovered.",
+    cause="The connection to Cassandra has recovered.",
+    effect="Cassandra backed services are available again.",
+    action="None.",
+    priority=PDLog.LOG_NOTICE)

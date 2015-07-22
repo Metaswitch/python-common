@@ -36,6 +36,7 @@ import logging
 from threading import Lock
 from alarms import issue_alarm
 from monotonic_time import monotonic_time
+from . import pdlogs
 
 _log = logging.getLogger(__name__)
 
@@ -53,11 +54,13 @@ class CommunicationMonitor(object):
     def set_alarm(self):
         self.alarmed = True
         _log.warning("Raising alarm {}".format(self._raise_identifier))
+        pdlogs.CONNECTION_LOST.log()
         issue_alarm(self._process, self._raise_identifier)
 
     def clear_alarm(self):
         self.alarmed = False
         _log.warning("Clearing alarm {}".format(self._clear_identifier))
+        pdlogs.CONNECTION_RECOVERED.log()
         issue_alarm(self._process, self._clear_identifier)
 
     def update_alarm_state(self):
