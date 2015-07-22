@@ -52,6 +52,6 @@ setup(
     packages=find_packages('.'),
     package_dir={'':'.'},
     test_suite='metaswitch.common.test',
-    install_requires=["py-bcrypt", "pycrypto"],
+    install_requires=["py-bcrypt", "pycrypto", "pyzmq"],
     tests_require=["Mock"]
     )
