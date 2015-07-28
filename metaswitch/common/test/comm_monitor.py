@@ -37,13 +37,14 @@ import unittest
 import mock
 
 from metaswitch.common.comm_monitor import CommunicationMonitor
+from metaswitch.common.pdlogs import CASSANDRA_CONNECTION_LOST, CASSANDRA_CONNECTION_RECOVERED
 
 class CMTestCase(unittest.TestCase):
     @mock.patch("metaswitch.common.comm_monitor.issue_alarm")
     @mock.patch("metaswitch.common.comm_monitor.monotonic_time")
     def test_simple(self, mock_time, mock_alarm):
         """Simple test of basic behaviour."""
-        cm = CommunicationMonitor("ut", "raise", "clear")
+        cm = CommunicationMonitor("ut", "raise", "clear", CASSANDRA_CONNECTION_LOST, CASSANDRA_CONNECTION_RECOVERED)
 
         # Move time forwards and report a failure. We should raise an alarm.
         mock_time.return_value = 1000
