@@ -70,7 +70,7 @@ class PDLog(object):
         to set an appropriate process name."""
         syslog.syslog(self._priority, self._text.format(**kwargs))
 
-CONNECTION_LOST = PDLog(
+CASSANDRA_CONNECTION_LOST = PDLog(
     number=PDLog.CL_PYTHON_COMMON_ID + 1,
     desc="The connection to Cassandra has been lost.",
     cause="The connection to Cassandra has been lost.",
@@ -80,7 +80,7 @@ CONNECTION_LOST = PDLog(
       "(3). Check the right ports are open for Cassandra connectivity.",
     priority=PDLog.LOG_ERR)
 
-CONNECTION_RECOVERED = PDLog(
+CASSANDRA_CONNECTION_RECOVERED = PDLog(
     number=PDLog.CL_PYTHON_COMMON_ID + 2,
     desc="The connection to Cassandra has recovered.",
     cause="The connection to Cassandra has recovered.",
