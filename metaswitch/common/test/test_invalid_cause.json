@@ -1,0 +1,21 @@
+{
+    "alarms": [
+        {
+            "name": "NAME",
+            "index": 1000,
+            "cause": "NOT_CAUSE",
+            "levels": [
+                {
+                  "severity": "CLEARED",
+                  "description": "description",
+                  "details": "details"
+                },
+                {
+                  "severity": "CRITICAL",
+                  "description": "description",
+                  "details": "details"
+                }
+            ]
+        }
+    ]
+}
