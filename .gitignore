@@ -11,3 +11,4 @@ bootstrap.py
 develop-eggs
 eggs
 htmlcov
+.eggs
