@@ -41,14 +41,14 @@ class AlarmsParserTestCase(unittest.TestCase):
 
     def testInvalidCause(self):
         try:
-            alarms = parse_alarms_file('metaswitch/common/test/test_invalid_cause.json')
+            parse_alarms_file('metaswitch/common/test/test_invalid_cause.json')
             assert False, "Should have failed to parse file"
         except AssertionError as e:
             assert str(e) == "Cause (NOT_CAUSE) invalid in alarm NAME"
 
     def testMissingNonClearedAlarm(self):
         try:
-            alarms = parse_alarms_file('metaswitch/common/test/test_missing_non_cleared.json')
+            parse_alarms_file('metaswitch/common/test/test_missing_non_cleared.json')
             assert False, "Should have failed to parse file"
         except AssertionError as e:
             assert str(e) == "Alarm NAME missing any non-cleared severities"

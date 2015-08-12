@@ -36,7 +36,6 @@ import logging
 from threading import Lock
 from alarms import issue_alarm
 from monotonic_time import monotonic_time
-from . import pdlogs
 
 _log = logging.getLogger(__name__)
 

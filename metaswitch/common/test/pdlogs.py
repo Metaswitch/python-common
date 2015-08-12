@@ -34,7 +34,6 @@
 
 import unittest
 import mock
-import syslog
 from metaswitch.common.pdlogs import PDLog
 
 class PDLogTestCase(unittest.TestCase):

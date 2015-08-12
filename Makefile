@@ -13,6 +13,15 @@ all: help
 help:
 	@cat README.md
 
+verify:
+	flake8 --select=E10,E11,E9,F metaswitch/
+
+style:
+	flake8 --select=E,W,C,N --max-line-length=100 metaswitch/
+
+explain-style:
+	flake8 --select=E,W,C,N --show-pep8 --first --max-line-length=100 metaswitch/
+
 .PHONY: test
 test: $(ENV_DIR)/bin/python setup.py env
 	LIBRARY_PATH=. CC="g++ -Icpp-common/include" $(ENV_DIR)/bin/python setup.py test

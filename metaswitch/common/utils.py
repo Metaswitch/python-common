@@ -39,7 +39,6 @@ import logging
 import math
 import binascii
 import base64
-import threading
 import traceback
 import hashlib
 import bcrypt
