@@ -1,4 +1,4 @@
-# @file setup.py
+# @file utils.py
 #
 # Project Clearwater - IMS in the Cloud
 # Copyright (C) 2013  Metaswitch Networks Ltd
@@ -32,27 +32,14 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-import logging
-import sys
+import unittest
+from metaswitch.common import network_namespace
 
-from setuptools import setup, Extension
-from logging import StreamHandler
+class NetworkNamespaceTestCase(unittest.TestCase):
 
-_log = logging.getLogger("common")
-_log.setLevel(logging.DEBUG)
-_handler = StreamHandler(sys.stderr)
-_handler.setLevel(logging.DEBUG)
-_log.addHandler(_handler)
-
-setup(
-    name='metaswitchcommon',
-    version='0.1',
-    packages=['metaswitch', 'metaswitch.common'],
-    package_dir={'':'.'},
-    test_suite='metaswitch.common.test',
-    setup_requires=["cffi"],
-    ext_package="metaswitch.common",
-    cffi_modules=["cffi_build.py:ffi"],
-    install_requires=["py-bcrypt", "pycrypto", "pyzmq", "cffi"],
-    tests_require=["Mock"]
-    )
+    # Test that we can call get_signalling_socket (and that it fails, returning
+    # None). This is largely a test that all the CFFI infrastructure is in
+    # place.
+    def test_netns(self):
+        self.assertEquals(network_namespace.get_signalling_socket("localhost", 9000),
+                          None)
