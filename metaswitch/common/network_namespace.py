@@ -36,9 +36,7 @@ from metaswitch.common._cffi import lib
 import socket
 
 def get_signalling_socket(host, port):
-    fd = lib.create_connection_in_namespace(host,
-                                            str(port),
-                                            "/tmp/clearwater_signaling_namespace_socket")
+    fd = lib.create_connection_in_signaling_namespace(host, str(port))
     if (fd > 0):
         return socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
     else:

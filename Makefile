@@ -62,7 +62,13 @@ envclean:
 	rm -rf bin eggs develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
+	rm metaswitch/common/_cffi.so *.o libclearwaterutils.a
 
-libclearwaterutils.a: $(shell find cpp-common/include -type f) cpp-common/src/namespace_hop.cpp
-	g++ -fPIC -o libclearwaterutils.o -std=c++0x -Wall -Werror -Icpp-common/include -c cpp-common/src/namespace_hop.cpp
-	ar cr libclearwaterutils.a libclearwaterutils.o
+
+VPATH = cpp-common/src:cpp-common/include
+
+%.o: %.cpp $(shell find cpp-common/include -type f)
+	g++ -fPIC -o $@ -std=c++0x -Wall -Werror -Icpp-common/include -c $<
+
+libclearwaterutils.a: namespace_hop.o logger.o log.o
+	ar cr libclearwaterutils.a $^
