@@ -12,5 +12,6 @@ develop-eggs
 eggs
 htmlcov
 .eggs
-libclearwaterutils.a
-libclearwaterutils.o
+*.a
+*.o
+*.so
