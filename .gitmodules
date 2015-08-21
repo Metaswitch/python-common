@@ -1,0 +1,3 @@
+[submodule "cpp-common"]
+	path = cpp-common
+	url = git@github.com:Metaswitch/cpp-common.git

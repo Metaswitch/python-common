@@ -1,7 +1,7 @@
-# @file setup.py
+# @file alarms.py
 #
 # Project Clearwater - IMS in the Cloud
-# Copyright (C) 2013  Metaswitch Networks Ltd
+# Copyright (C) 2015 Metaswitch Networks Ltd
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -32,27 +32,13 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-import logging
-import sys
+from metaswitch.common._cffi import lib
+import socket
 
-from setuptools import setup, Extension
-from logging import StreamHandler
+def get_signalling_socket(host, port):
+    fd = lib.create_connection_in_signaling_namespace(host, str(port))
+    if (fd > 0):
+        return socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
+    else:
+        return None
 
-_log = logging.getLogger("common")
-_log.setLevel(logging.DEBUG)
-_handler = StreamHandler(sys.stderr)
-_handler.setLevel(logging.DEBUG)
-_log.addHandler(_handler)
-
-setup(
-    name='metaswitchcommon',
-    version='0.1',
-    packages=['metaswitch', 'metaswitch.common'],
-    package_dir={'':'.'},
-    test_suite='metaswitch.common.test',
-    setup_requires=["cffi"],
-    ext_package="metaswitch.common",
-    cffi_modules=["cffi_build.py:ffi"],
-    install_requires=["py-bcrypt", "pycrypto", "pyzmq", "cffi"],
-    tests_require=["Mock"]
-    )

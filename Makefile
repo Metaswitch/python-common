@@ -23,11 +23,11 @@ explain-style:
 	flake8 --select=E,W,C,N --show-pep8 --first --max-line-length=100 metaswitch/
 
 .PHONY: test
-test: bin/python setup.py
-	bin/python setup.py test
+test: $(ENV_DIR)/bin/python setup.py env
+	LIBRARY_PATH=. CC="g++ -Icpp-common/include" $(ENV_DIR)/bin/python setup.py test
 
 .PHONY: coverage
-coverage: bin/coverage setup.py
+coverage: $(ENV_DIR)/bin/coverage setup.py
 	rm -rf htmlcov/
 	bin/coverage erase
 	bin/coverage run --source metaswitch --omit "**/test/**"  setup.py test
@@ -35,25 +35,26 @@ coverage: bin/coverage setup.py
 	bin/coverage html
 
 .PHONY: env
-env: bin/python 
-
-bin/python bin/coverage: bin/buildout buildout.cfg
-ifeq ($(X86_64_ONLY),1)
-	ARCHFLAGS="-arch x86_64" ./bin/buildout -N
-else
-	ARCHFLAGS="-arch i386 -arch x86_64" ./bin/buildout -N
-endif
-
-bin/buildout: $(ENV_DIR)/bin/python
-	mkdir -p .buildout_downloads/dist
-	$(ENV_DIR)/bin/easy_install "setuptools>0.7"
-	$(ENV_DIR)/bin/easy_install distribute
-	$(ENV_DIR)/bin/easy_install zc.buildout
-	mkdir -p bin/
-	ln -s $(ENV_DIR)/bin/buildout bin/
+env: ${ENV_DIR}/.eggs_installed
 
 $(ENV_DIR)/bin/python:
-	virtualenv --no-site-packages --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
+	# Set up a fresh virtual environment
+	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
+	$(ENV_DIR)/bin/easy_install "setuptools>0.7"
+	$(ENV_DIR)/bin/easy_install distribute
+
+${ENV_DIR}/.eggs_installed : $(ENV_DIR)/bin/python setup.py $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
+	# Generate .egg files for python-common
+	LIBRARY_PATH=. CC="gcc -Icpp-common/include" ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
+	
+	# Download the egg files they depend upon
+	${ENV_DIR}/bin/easy_install -zmaxd .eggs/ .eggs/*.egg
+	
+	# Install the downloaded egg files
+	${ENV_DIR}/bin/easy_install --allow-hosts=None -f .eggs/ .eggs/*.egg
+	
+	# Touch the sentinel file
+	touch $@
 
 .PHONY: clean
 clean: envclean pyclean
@@ -70,4 +71,13 @@ envclean:
 	rm -rf bin eggs develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
+	rm metaswitch/common/_cffi.so *.o libclearwaterutils.a
 
+
+VPATH = cpp-common/src:cpp-common/include
+
+%.o: %.cpp $(shell find cpp-common/include -type f)
+	g++ -fPIC -o $@ -std=c++0x -Wall -Werror -Icpp-common/include -c $<
+
+libclearwaterutils.a: namespace_hop.o logger.o log.o
+	ar cr libclearwaterutils.a $^

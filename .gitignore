@@ -12,3 +12,6 @@ develop-eggs
 eggs
 htmlcov
 .eggs
+*.a
+*.o
+*.so
