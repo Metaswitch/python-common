@@ -49,6 +49,10 @@ $(ENV_DIR)/bin/python:
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
 
+.PHONY: build_common_egg
+build_common_egg: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
+	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d $(EGG_DIR)
+
 ${ENV_DIR}/.eggs_installed : $(ENV_DIR)/bin/python setup.py $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	# Generate .egg files for python-common
 	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
