@@ -44,6 +44,7 @@ $(ENV_DIR)/bin/python:
 	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
 	$(ENV_DIR)/bin/easy_install "setuptools>0.7"
 	$(ENV_DIR)/bin/easy_install distribute
+	$(ENV_DIR)/bin/pip install cffi
 
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
