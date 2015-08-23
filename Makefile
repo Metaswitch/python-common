@@ -1,6 +1,8 @@
 ENV_DIR := $(shell pwd)/_env
 PYTHON_BIN := $(shell which python)
 
+COMPILER_FLAGS := LIBRARY_PATH=. CC="g++ -Icpp-common/include"
+
 # The build has been seen to fail on Mac OSX when trying to build on i386. Enable this to build for x86_64 only
 X86_64_ONLY=0
 
@@ -24,15 +26,15 @@ explain-style:
 
 .PHONY: test
 test: $(ENV_DIR)/bin/python setup.py env
-	LIBRARY_PATH=. CC="g++ -Icpp-common/include" $(ENV_DIR)/bin/python setup.py test
+	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
 
 .PHONY: coverage
-coverage: $(ENV_DIR)/bin/coverage setup.py
+coverage: $(ENV_DIR)/bin/coverage setup.py env
 	rm -rf htmlcov/
-	bin/coverage erase
-	bin/coverage run --source metaswitch --omit "**/test/**"  setup.py test
-	bin/coverage report -m
-	bin/coverage html
+	_env/bin/coverage erase
+	$(COMPILER_FLAGS) _env/bin/coverage run --source metaswitch --omit "**/test/**"  setup.py test
+	_env/bin/coverage report -m
+	_env/bin/coverage html
 
 .PHONY: env
 env: ${ENV_DIR}/.eggs_installed
@@ -43,9 +45,12 @@ $(ENV_DIR)/bin/python:
 	$(ENV_DIR)/bin/easy_install "setuptools>0.7"
 	$(ENV_DIR)/bin/easy_install distribute
 
+$(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
+	$(ENV_DIR)/bin/pip install coverage
+
 ${ENV_DIR}/.eggs_installed : $(ENV_DIR)/bin/python setup.py $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	# Generate .egg files for python-common
-	LIBRARY_PATH=. CC="gcc -Icpp-common/include" ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
+	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
 	
 	# Download the egg files they depend upon
 	${ENV_DIR}/bin/easy_install -zmaxd .eggs/ .eggs/*.egg
