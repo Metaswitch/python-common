@@ -35,6 +35,7 @@ import syslog
 class PDLog(object):
     """Class for defining and making problem determination logs."""
     LOG_NOTICE = syslog.LOG_NOTICE
+    LOG_WARNING = syslog.LOG_WARNING
     LOG_ERR = syslog.LOG_ERR
 
     CL_CPP_COMMON_ID = 1000
@@ -48,6 +49,7 @@ class PDLog(object):
     CL_CONFIG_MGR_ID = 9000
     # Ranges 10000 to 11999 are reserved
     CL_PYTHON_COMMON_ID = 12000
+    CL_CREST_ID = 13000
 
     def __init__(self, number, desc, cause, effect, action, priority):
         """Defines a particular log's priority and log text.
@@ -55,7 +57,7 @@ class PDLog(object):
         The desc, cause, effect and action strings can have named format string
         parameters, which will be filled in when log{} is called.
 
-        The priority mist be LOG_NOTICE or LOG_ERR."""
+        The priority must be LOG_NOTICE, LOG_WARNING or LOG_ERR."""
         self._text = ("{} - Description: {} "+
                       "@@Cause: {} "+
                       "@@Effect: {} "+
