@@ -38,6 +38,8 @@ class PDLog(object):
     LOG_WARNING = syslog.LOG_WARNING
     LOG_ERR = syslog.LOG_ERR
 
+    # The following must be kept in sync with
+    # https://github.com/Metaswitch/cpp-common/blob/dev/include/pdlog.h
     CL_CPP_COMMON_ID = 1000
     CL_SPROUT_ID = 2000
     CL_CHRONOS_ID = 3000
