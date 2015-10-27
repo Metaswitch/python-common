@@ -46,6 +46,7 @@ import time
 import signal
 from urllib import quote
 from Crypto.Cipher import Blowfish
+from fcntl import flock, LOCK_EX, LOCK_NB
 
 _log = logging.getLogger("metaswitch.utils")
 
@@ -399,3 +400,22 @@ def install_sigusr1_handler(process_name):
         stack_dump = "Caught SIGUSR1\n" + "".join(traceback.format_stack(stack))
         write_core_file(process_name, stack_dump)
     signal.signal(signal.SIGUSR1, sigusr1_handler)
+
+def write_pid_file(filename):
+    """ Attempts to write a pidfile. If that pidfile is currently
+    locked, returns -1 - the caller should exit at that point."""
+    pid = os.getpid()
+    pidfile = open(filename, "w")
+    try:
+        flock(pidfile, LOCK_EX | LOCK_NB)
+        _log.info("Acquired exclusive lock on %s", filename)
+    except IOError:
+        _log.error("Lock on %s is held by another process", filename)
+        return None
+
+    pidfile.write(str(pid) + "\n")
+
+    # Return the lockfile's descriptor to keep it open
+    # (and keep us holding the lock)
+    return pidfile
+
