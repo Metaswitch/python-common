@@ -401,9 +401,10 @@ def install_sigusr1_handler(process_name):
         write_core_file(process_name, stack_dump)
     signal.signal(signal.SIGUSR1, sigusr1_handler)
 
-def write_pid_file(filename):
-    """ Attempts to write a pidfile. If that pidfile is currently
-    locked, returns -1 - the caller should exit at that point."""
+def lock_and_write_pid_file(filename):
+    """ Attempts to write a pidfile, and returns the file object (to keep it
+    open and keep us holding the lock). If that pidfile is currently locked,
+    raises IOError - the caller should exit at that point."""
     pid = os.getpid()
     pidfile = open(filename, "w")
     try:
@@ -411,11 +412,9 @@ def write_pid_file(filename):
         _log.info("Acquired exclusive lock on %s", filename)
     except IOError:
         _log.error("Lock on %s is held by another process", filename)
-        return None
+        raise
 
     pidfile.write(str(pid) + "\n")
 
-    # Return the lockfile's descriptor to keep it open
-    # (and keep us holding the lock)
     return pidfile
 
