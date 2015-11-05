@@ -42,12 +42,10 @@ env: ${ENV_DIR}/.eggs_installed
 $(ENV_DIR)/bin/python:
 	# Set up a fresh virtual environment
 	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
-	$(ENV_DIR)/bin/easy_install "setuptools>0.7"
-	$(ENV_DIR)/bin/easy_install distribute
-	$(ENV_DIR)/bin/pip install cffi
+	$(ENV_DIR)/bin/pip install -U configparser "setuptools>0.7" distribute cffi || (rm -rf $(ENV_DIR) && false)
 
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
-	$(ENV_DIR)/bin/pip install coverage
+	$(ENV_DIR)/bin/pip install -U coverage
 
 .PHONY: build_common_egg
 build_common_egg: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
@@ -56,13 +54,13 @@ build_common_egg: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
 ${ENV_DIR}/.eggs_installed : $(ENV_DIR)/bin/python setup.py $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	# Generate .egg files for python-common
 	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
-	
+
 	# Download the egg files they depend upon
 	${ENV_DIR}/bin/easy_install -zmaxd .eggs/ .eggs/*.egg
-	
+
 	# Install the downloaded egg files
 	${ENV_DIR}/bin/easy_install --allow-hosts=None -f .eggs/ .eggs/*.egg
-	
+
 	# Touch the sentinel file
 	touch $@
 
@@ -81,7 +79,7 @@ envclean:
 	rm -rf bin eggs develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
-	rm metaswitch/common/_cffi.so *.o libclearwaterutils.a
+	-rm metaswitch/common/_cffi.so *.o libclearwaterutils.a
 
 
 VPATH = cpp-common/src:cpp-common/include
