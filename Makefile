@@ -1,7 +1,7 @@
 ENV_DIR := $(shell pwd)/_env
 PYTHON_BIN := $(shell which python)
 
-COMPILER_FLAGS := LIBRARY_PATH=. CC="g++ -Icpp-common/include"
+COMPILER_FLAGS := LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
 
 # The build has been seen to fail on Mac OSX when trying to build on i386. Enable this to build for x86_64 only
 X86_64_ONLY=0
