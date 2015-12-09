@@ -52,6 +52,7 @@ class PDLog(object):
     # Ranges 10000 to 11999 are reserved
     CL_PYTHON_COMMON_ID = 12000
     CL_CREST_ID = 13000
+    CL_QUEUE_MGR_ID = 14000
 
     def __init__(self, number, desc, cause, effect, action, priority):
         """Defines a particular log's priority and log text.
