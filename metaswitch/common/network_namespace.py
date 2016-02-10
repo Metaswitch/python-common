@@ -1,4 +1,4 @@
-# @file alarms.py
+# @file network_namespace.py
 #
 # Project Clearwater - IMS in the Cloud
 # Copyright (C) 2015 Metaswitch Networks Ltd
