@@ -46,6 +46,10 @@ _log = logging.getLogger(__name__)
 sendrequest = None
 
 def issue_alarm(process, identifier):
+    # Clearwater nodes all have clearwater-infrastructure installed.
+    # It includes a command-line script that can be used to issue an alarm.
+    # Rather than refactor clearwater-infrastructure, we re-use the function
+    # used by the script by importing it here.
     global sendrequest
     if sendrequest is None:
         try:
