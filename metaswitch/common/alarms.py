@@ -39,28 +39,130 @@
 
 
 import logging
+import atexit
+from monotonic import monotonic
+import threading
 import imp
 
 _log = logging.getLogger(__name__)
 
-sendrequest = None
+# Imported sendrequest method set up in issue_alarm.
+_sendrequest = None
 
-def issue_alarm(process, identifier):
+
+class _AlarmManager(threading.Thread):
+    """
+    Singleton iterface to alarm code.
+
+    Use the instance alarm_manager as the single entry point into alarm
+    handling code.
+
+    Keeps a record of all alarms and makes sure they are re-raised 
+    periodically.
+    """
+    # Interval in seconds.
+    RE_SYNC_INTERVAL = 30
+
+    def __init__(self):
+        self._alarm_registry = {}
+        self._condition = threading.Condition()
+        self._registry_lock = threading.Lock()
+        self._should_terminate = False
+        self._next_resync_time = monotonic() + RE_SYNC_INTERVAL
+        self.start()
+        atexit.register(self.terminate)
+
+    def get_alarm(self, issuer, index, severity):
+        with self._alarm_lock:
+            alarm = self._alarm_registry.get((issuer, index, severity), None)
+
+            if not alarm:
+                alarm = Alarm(issuer, index, severity)
+                self._alarm_registry[(issuer, index, severity)] = alarm
+
+        return alarm
+
+    def run(self):
+        with self._condition:
+            while True:
+                sleep_time = self._get_sleep_time()
+                self._condition.wait(sleep_time)
+                if self._should_terminate:
+                    break;
+                self._re_sync_alarms()
+
+    def terminate(self):
+        with self._condition:
+            self._should_terminate = True
+            self._condition.notify()
+
+    def _re_sync_alarms(self):
+        current_alarms = self._alarm_registry.values()
+        for alarm in current_alarms:
+            alarm.re_sync()
+
+    def _get_sleep_time(self):
+        self._next_resync_time += 30
+        current_time = monotonic()
+        sleep_time = self._next_resync_time - current_time
+
+        if sleep_time <= 0:
+            _log.error('Missed alarm re-sync time by %ds', -sleep_time)
+            skips = ((sleep_time / RE_SYNC_INTERVAL) + 1)
+            self._next_resync_time += skips * RE_SYNC_INTERVAL
+            sleep_time = next_resync_time - current_time
+
+        return sleep_time
+
+alarm_manager = _AlarmManager()
+
+
+class Alarm(object):
+    def __init__(self, issuer, index, severity):
+        _alarm_manager.register(self)
+        self._alarm_state = AlarmState(issuer, index, severity)
+        self._clear_state = AlarmState(issuer, index, SEVERITY_CLEARED)
+        self._last_state_raised = self._clear_state
+
+    def set(self):
+        self._last_state_raised = self._alarm_state
+        self.re_sync()
+
+    def clear(self):
+        self._last_state_raised = self._clear_state
+        self.re_sync()
+
+    def re_sync(self):
+        self._last_state_raised.notify()
+
+
+class AlarmState(object):
+    def __init__(self, issuer, index, severity):
+        self.issuer = issuer
+        self.index = index
+        self.severity = severity
+
+    def notify(self):
+        identifier = '{}.{}'.format(self.index, self.severity)
+        _issue_alarm(issuer, identifier)
+
+
+def _issue_alarm(process, identifier):
     # Clearwater nodes all have clearwater-infrastructure installed.
     # It includes a command-line script that can be used to issue an alarm.
     # We import the function used by the script and re-use it.
     #
     # See https://github.com/Metaswitch/clearwater-infrastructure/blob/master/clearwater-infrastructure/usr/share/clearwater/bin/alarms.py
     # for the target module.
-    global sendrequest
-    if sendrequest is None:
+    global _sendrequest
+    if _sendrequest is None:
         try:
             file, pathname, description = imp.find_module("alarms", ["/usr/share/clearwater/bin"])
             mod = imp.load_module("alarms", file, pathname, description)
-            sendrequest = mod.sendrequest
+            _sendrequest = mod.sendrequest
             _log.info("Imported /usr/share/clearwater/bin/alarms.py")
         except ImportError:
             _log.error("Could not import /usr/share/clearwater/bin/alarms.py, alarms will not be sent")
 
-    if sendrequest:
-        sendrequest(["issue-alarm", process, identifier])
+    if _sendrequest:
+        _sendrequest(["issue-alarm", process, identifier])
