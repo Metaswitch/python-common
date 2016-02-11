@@ -120,7 +120,8 @@ def render_alarm(name, index, severities):
     Returns a string of format
     `ALARM_NAME = (index, severity1, severity2, ...)`.
     """
-    handle_data = [index].extend(severities)
+    handle_data = [index]
+    handle_data.extend(severities)
     return '{} = {}\n'.format(name.upper(),
                               tuple(handle_data))
 
