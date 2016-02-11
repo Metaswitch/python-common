@@ -30,22 +30,22 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 import json
-import alarms
+import alarm_severities
 
-# Valid severity levels - this should be kept in sync with the
+# valid severity levels - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
-# Alarms are stored in ITU Alarm Table using the severities below.
-# Alarm Model Table stores alarms according to their state. The
-# mapping between state and severity is described in RFC 3877
+# alarms are stored in itu alarm table using the severities below.
+# alarm model table stores alarms according to their state. the
+# mapping between state and severity is described in rfc 3877
 # section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4
-# The function AlarmTableDef::state() maps severities to states.
+# the function alarmtabledef::state() maps severities to states.
 
-valid_severity = {"cleared": alarms.CLEARED,
-                  "indeterminate": alarms.INDETERMINATE,
-                  "critical": alarms.CRITICAL,
-                  "major": alarms.MAJOR,
-                  "minor": alarms.MINOR,
-                  "warning": alarms.WARNING}
+valid_severity = {"cleared": alarm_severities.CLEARED,
+                  "indeterminate": alarm_severities.INDETERMINATE,
+                  "critical": alarm_severities.CRITICAL,
+                  "major": alarm_severities.MAJOR,
+                  "minor": alarm_severities.MINOR,
+                  "warning": alarm_severities.WARNING}
 
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common

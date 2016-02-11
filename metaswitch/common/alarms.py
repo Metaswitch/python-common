@@ -37,24 +37,22 @@
 # snmp alarm sub-agent for further handling. If the agent is unavailable,
 # the request will timeout after 2 seconds and be dropped.
 
-
 import logging
 import atexit
 from monotonic import monotonic
 import threading
 import imp
+from alarm_severities import (CLEARED,
+                              INDETERMINATE,
+                              CRITICAL,
+                              MAJOR,
+                              MINOR,
+                              WARNING)
 
 _log = logging.getLogger(__name__)
 
 # Imported sendrequest method set up in issue_alarm.
 _sendrequest = None
-
-CLEARED = 1
-INDETERMINATE = 2
-CRITICAL = 3
-MAJOR = 4
-MINOR = 5
-WARNING = 6
 
 
 class _AlarmManager(threading.Thread):
