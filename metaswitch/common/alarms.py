@@ -67,18 +67,22 @@ class _AlarmManager(threading.Thread):
         self._alarm_registry = {}
         self._condition = threading.Condition()
         self._registry_lock = threading.Lock()
-        self._should_terminate = False
         self._next_resync_time = monotonic() + RE_SYNC_INTERVAL
-        self.start()
-        atexit.register(self.terminate)
+        self._should_terminate = False
+        self._running = False
 
     def get_alarm(self, issuer, index, severity):
         with self._alarm_lock:
             alarm = self._alarm_registry.get((issuer, index, severity), None)
 
             if not alarm:
+                should_start = (not self._running) and (not self._should_terminate)
                 alarm = Alarm(issuer, index, severity)
                 self._alarm_registry[(issuer, index, severity)] = alarm
+
+        if should_start:
+            self.start()
+            atexit.register(self.terminate)
 
         return alarm
 
