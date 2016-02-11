@@ -57,7 +57,7 @@ class _AlarmManager(threading.Thread):
     Use the instance alarm_manager as the single entry point into alarm
     handling code.
 
-    Keeps a record of all alarms and makes sure they are re-raised 
+    Keeps a record of all alarms and makes sure they are re-raised
     periodically.
     """
     # Interval in seconds.
@@ -67,11 +67,12 @@ class _AlarmManager(threading.Thread):
         self._alarm_registry = {}
         self._condition = threading.Condition()
         self._registry_lock = threading.Lock()
-        self._next_resync_time = monotonic() + RE_SYNC_INTERVAL
+        self._next_resync_time = monotonic() + self.RE_SYNC_INTERVAL
         self._should_terminate = False
         self._running = False
 
-    def get_alarm(self, issuer, index, severity):
+    def get_alarm(self, alarm_identifier):
+        index, severity = alarm_identifier.split('.')
         with self._alarm_lock:
             alarm = self._alarm_registry.get((issuer, index, severity), None)
 
@@ -112,8 +113,8 @@ class _AlarmManager(threading.Thread):
 
         if sleep_time <= 0:
             _log.error('Missed alarm re-sync time by %ds', -sleep_time)
-            skips = ((sleep_time / RE_SYNC_INTERVAL) + 1)
-            self._next_resync_time += skips * RE_SYNC_INTERVAL
+            skips = ((sleep_time / self.RE_SYNC_INTERVAL) + 1)
+            self._next_resync_time += skips * self.RE_SYNC_INTERVAL
             sleep_time = next_resync_time - current_time
 
         return sleep_time

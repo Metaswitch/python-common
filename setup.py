@@ -53,6 +53,6 @@ setup(
     setup_requires=["cffi"],
     ext_package="metaswitch.common",
     cffi_modules=["cffi_build.py:ffi"],
-    install_requires=["py-bcrypt", "pycrypto", "pyzmq", "cffi"],
+    install_requires=["py-bcrypt", "pycrypto", "pyzmq", "cffi", "monotonic"],
     tests_require=["pbr==1.6", "Mock"]
     )

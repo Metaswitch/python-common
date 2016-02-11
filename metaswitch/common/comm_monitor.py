@@ -40,10 +40,9 @@ from monotonic_time import monotonic_time
 _log = logging.getLogger(__name__)
 
 class CommunicationMonitor(object):
-    def __init__(self, process, alarm_index, alarm_severity, raise_pd, clear_pd):
-        self._alarm = alarm_manager.get_alarm(process, alarm_index, alarm_severity)
-        self._alarm_index = alarm_index
-        self._alarm_severity = alarm_severity
+    def __init__(self, process, alarm_identifier, raise_pd, clear_pd):
+        self._alarm = alarm_manager.get_alarm(process, alarm_identifier)
+        self._alarm_identifier = alarm_identifier
         self._raise_pd = raise_pd
         self._clear_pd = clear_pd
         self.succeeded = 0
@@ -54,13 +53,13 @@ class CommunicationMonitor(object):
 
     def set_alarm(self):
         self.alarmed = True
-        _log.warning("Raising alarm %s.%s.", self._alarm_index, self._alarm_severity)
+        _log.warning("Raising alarm %s.", self._alarm_identifier)
         self._raise_pd.log()
         self._alarm.set()
 
     def clear_alarm(self):
         self.alarmed = False
-        _log.warning("Clearing alarm %s.%s.", self._alarm_index, self._alarm_severity)
+        _log.warning("Clearing alarm %s.", self._alarm_identifier)
         self._clear_pd.log()
         self._alarm.clear()
 
