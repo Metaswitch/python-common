@@ -120,8 +120,9 @@ def render_alarm(name, index, severities):
     Returns a string of format
     `ALARM_NAME = (index, severity1, severity2, ...)`.
     """
+    handle_data = [index].extend(severities)
     return '{} = {}\n'.format(name.upper(),
-                              tuple([index].extend(severities)))
+                              tuple(handle_data))
 
 
 def write_constants_file(alarm_details, constants_file):
