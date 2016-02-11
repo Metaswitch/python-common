@@ -31,6 +31,7 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 import unittest
+from metaswitch.common.alarms import CLEARED, CRITICAL
 from metaswitch.common.alarms_parser import parse_alarms_file
 
 class AlarmsParserTestCase(unittest.TestCase):
@@ -39,8 +40,8 @@ class AlarmsParserTestCase(unittest.TestCase):
         test_alarm = alarms[0]
         self.assertEqual(test_alarm[0], 'NAME', msg="Incorrect name.")
         self.assertEqual(test_alarm[1], 1000, msg="Incorrect index.")
-        self.assertIn(1, test_alarm[2], msg="No clearer state.")
-        self.assertIn(3, test_alarm[2], msg="No critical state.")
+        self.assertIn(CLEARED, test_alarm[2], msg="No cleared state.")
+        self.assertIn(CRITICAL, test_alarm[2], msg="No critical state.")
 
     def testInvalidCause(self):
         try:

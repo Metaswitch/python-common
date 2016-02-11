@@ -49,7 +49,12 @@ _log = logging.getLogger(__name__)
 # Imported sendrequest method set up in issue_alarm.
 _sendrequest = None
 
-SEVERITY_CLEARED = 1
+CLEARED = 1
+INDETERMINATE = 2
+CRITICAL = 3
+MAJOR = 4
+MINOR = 5
+WARNING = 6
 
 
 class _AlarmManager(threading.Thread):
@@ -80,7 +85,7 @@ class _AlarmManager(threading.Thread):
             if not alarm:
                 index = alarm_handle[0]
                 severities = alarm_handle[1:]
-                severities.remove(SEVERITY_CLEARED)
+                severities.remove(CLEARED)
 
                 if len(severities) == 1:
                     alarm = Alarm(issuer, index, severities[0])
@@ -136,7 +141,7 @@ alarm_manager = _AlarmManager()
 class BaseAlarm(object):
     def __init__(self, issuer, index):
         _alarm_manager.register(self)
-        self._clear_state = AlarmState(issuer, index, SEVERITY_CLEARED)
+        self._clear_state = AlarmState(issuer, index, CLEARED)
         self._last_state_raised = self._clear_state
 
     def clear(self):

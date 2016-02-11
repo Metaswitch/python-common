@@ -30,6 +30,7 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 import json
+import alarms
 
 # Valid severity levels - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
@@ -39,12 +40,12 @@ import json
 # section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4
 # The function AlarmTableDef::state() maps severities to states.
 
-valid_severity = {"cleared": 1,
-                  "indeterminate": 2,
-                  "critical": 3,
-                  "major": 4,
-                  "minor": 5,
-                  "warning": 6}
+valid_severity = {"cleared": alarms.CLEARED,
+                  "indeterminate": alarms.INDETERMINATE,
+                  "critical": alarms.CRITICAL,
+                  "major": alarms.MAJOR,
+                  "minor": alarms.MINOR,
+                  "warning": alarms.WARNING}
 
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
