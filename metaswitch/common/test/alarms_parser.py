@@ -36,8 +36,11 @@ from metaswitch.common.alarms_parser import parse_alarms_file
 class AlarmsParserTestCase(unittest.TestCase):
     def testValidFile(self):
         alarms = parse_alarms_file('metaswitch/common/test/test_valid_alarms.json')
-        assert alarms['NAME_CLEARED'] == "1000.1", "Missing or incorrect cleared alarm"
-        assert alarms['NAME_CRITICAL'] == "1000.3", "Missing or incorrect critical alarm"
+        test_alarm = alarms[0]
+        self.assertEqual(test_alarm[0], 'NAME', msg="Incorrect name.")
+        self.assertEqual(test_alarm[1], 1000, msg="Incorrect index.")
+        self.assertIn(1, test_alarm[2], msg="No clearer state.")
+        self.assertIn(3, test_alarm[2], msg="No critical state.")
 
     def testInvalidCause(self):
         try:

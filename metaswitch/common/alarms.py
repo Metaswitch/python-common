@@ -49,6 +49,8 @@ _log = logging.getLogger(__name__)
 # Imported sendrequest method set up in issue_alarm.
 _sendrequest = None
 
+SEVERITY_CLEARED = 1
+
 
 class _AlarmManager(threading.Thread):
     """
@@ -71,15 +73,24 @@ class _AlarmManager(threading.Thread):
         self._should_terminate = False
         self._running = False
 
-    def get_alarm(self, alarm_identifier):
-        index, severity = alarm_identifier.split('.')
+    def get_alarm(self, issuer, alarm_handle):
         with self._alarm_lock:
-            alarm = self._alarm_registry.get((issuer, index, severity), None)
+            alarm = self._alarm_registry.get((issuer, alarm_handle), None)
 
             if not alarm:
+                index = alarm_handle[0]
+                severities = alarm_handle[1:]
+                severities.remove(SEVERITY_CLEARED)
+
+                if len(severities) == 1:
+                    alarm = Alarm(issuer, index, severities[0])
+                elif len(severities) > 1:
+                    alarm = MultiSeverityAlarm(issuer, index, severities)
+                else:
+                    raise ValueError('alarm_handle must contain a severity.')
+
+                self._alarm_registry[(issuer, alarm_handle)] = alarm
                 should_start = (not self._running) and (not self._should_terminate)
-                alarm = Alarm(issuer, index, severity)
-                self._alarm_registry[(issuer, index, severity)] = alarm
 
         if should_start:
             self.start()
@@ -122,16 +133,11 @@ class _AlarmManager(threading.Thread):
 alarm_manager = _AlarmManager()
 
 
-class Alarm(object):
-    def __init__(self, issuer, index, severity):
+class BaseAlarm(object):
+    def __init__(self, issuer, index):
         _alarm_manager.register(self)
-        self._alarm_state = AlarmState(issuer, index, severity)
         self._clear_state = AlarmState(issuer, index, SEVERITY_CLEARED)
         self._last_state_raised = self._clear_state
-
-    def set(self):
-        self._last_state_raised = self._alarm_state
-        self.re_sync()
 
     def clear(self):
         self._last_state_raised = self._clear_state
@@ -139,6 +145,37 @@ class Alarm(object):
 
     def re_sync(self):
         self._last_state_raised.notify()
+
+
+class Alarm(object):
+    def __init__(self, issuer, index, severity):
+        super(Alarm, self).__init__(issuer, index)
+        self._alarm_state = AlarmState(issuer, index, severity)
+
+    def set(self):
+        self._last_state_raised = self._alarm_state
+        self.re_sync()
+
+
+class MultiSeverityAlarm(object):
+    def __init__(self, issuer, index, severities):
+        super(MultiSeverityAlarm, self).__init__(issuer, index)
+        self._severities = {severity: AlarmState(issuer, index, severity) for
+                            severity in severities}
+
+    def set(self, severity):
+        try:
+            self._last_state_raised = self._severities[severity]
+        except KeyError:
+            _log.error('Attempted to raise incorrect alarm state %s',
+                       severity)
+            raise
+
+        self.re_sync()
+
+    def clear(self):
+        self._last_state_raised = self._clear_state
+        self.re_sync()
 
 
 class AlarmState(object):

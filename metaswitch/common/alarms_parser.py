@@ -39,12 +39,12 @@ import json
 # section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4
 # The function AlarmTableDef::state() maps severities to states.
 
-valid_severity = {"cleared": "1",
-                  "indeterminate": "2",
-                  "critical": "3",
-                  "major": "4",
-                  "minor": "5",
-                  "warning": "6"}
+valid_severity = {"cleared": 1,
+                  "indeterminate": 2,
+                  "critical": 3,
+                  "major": 4,
+                  "minor": 5,
+                  "warning": 6}
 
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
@@ -57,10 +57,12 @@ valid_causes = ["software_error",
 def parse_alarms_file(json_file):
     # Open the JSON file and attempt to parse the JSON
     with open(json_file) as alarms_file:
-        alarms = json.load(alarms_file)
+        alarms_data = json.load(alarms_file)
+
+    alarms = alarms_data['alarms']
 
     # Dictionary of alarm names -> index. Built up by parsing the JSON file
-    alarm_names = {}
+    alarm_details = []
 
     # Parse the JSON file. Each alarm should:
     # - have a cleared alarm and a non-cleared alarm
@@ -68,9 +70,11 @@ def parse_alarms_file(json_file):
     # - have a severity that matches an allowed severity
     # - have the description/details text be less than 256 characters.
     try:
-        for alarm in alarms['alarms']:
+        for alarm in alarms:
             name = alarm['name']
             index = alarm['index']
+            severities = []
+
             assert alarm['cause'].lower() in valid_causes, \
      "Cause ({}) invalid in alarm {}".format(alarm['cause'], name)
 
@@ -91,13 +95,7 @@ def parse_alarms_file(json_file):
                 else:
                     found_non_cleared = True
 
-                severity_val = valid_severity[severity]
-
-                # Build up the constants dictionary. When we write to file
-                # the constants should have the format:
-                #   <ALARM_NAME>_<SEVERITY_NAME> = "<INDEX>_<SEVERITY_INT>"
-                alarm_names[name + "_" + severity.upper()] = \
-                                       str(index) + "." + severity_val
+                severities.append(valid_severity[severity])
 
             # Check that there was a cleared severity level and at least one
             # non-cleared
@@ -106,21 +104,36 @@ def parse_alarms_file(json_file):
             assert found_non_cleared, \
                    "Alarm {} missing any non-cleared severities".format(name)
 
+            alarm_details.append((name, index, severities))
+
     except KeyError as e:
         print "Invalid JSON format - missing mandatory value {}".format(e)
 
-    return alarm_names
+    return alarm_details
 
-def write_constants_file(alarm_names, constants_file):
+
+def render_alarm(name, index, severities):
+    """
+    Render an alarm for use in the Python alarm infrastructure.
+
+    Returns a string of format
+    `ALARM_NAME = (index, severity1, severity2, ...)`.
+    """
+    return '{} = {}\n'.format(name.upper(),
+                              tuple([index].extend(severities)))
+
+
+def write_constants_file(alarm_details, constants_file):
     # We've successfully parsed the alarms file. Now write the
     # alarm IDs to file.
     f = open(constants_file, 'w')
-    for key, value in alarm_names.items():
-        f.write(key + " = \"" + value + "\"\n")
+    for (name, index, severities) in alarm_details:
+        f.write(render_alarm(name, index, severities))
     f.close()
+
 
 # Read in the alarms from a JSON file, and write out the alarm IDs
 # with their index/severity
 def validate_alarms_and_write_constants(json_file, constants_file):
-    alarm_names = parse_alarms_file(json_file)
-    write_constants_file(alarm_names, constants_file)
+    alarm_details = parse_alarms_file(json_file)
+    write_constants_file(alarm_details, constants_file)
