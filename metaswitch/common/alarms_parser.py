@@ -118,7 +118,7 @@ def render_alarm(name, index, severities):
     Render an alarm for use in the Python alarm infrastructure.
 
     Returns a string of format
-    `ALARM_NAME = (index, severity1, severity2, ...)`.
+    `ALARM_NAME = (<index>, <severity1>, <severity2>, ...)`.
     """
     handle_data = [index]
     handle_data.extend(severities)

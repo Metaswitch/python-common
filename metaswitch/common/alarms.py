@@ -31,12 +31,20 @@
 # "OpenSSL Licenses" means the OpenSSL License and Original SSLeay License
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
+"""
+Interface for raising and clearing alarms in Python code.
 
+This module provides the interface for raising and clearing alarms in our
+python code.  Alarms should be raised using the classes in this module to
+ensure that they have the correct retry and re-synchronization logic applied.
 
-# This module provides a method for transporting alarm requests to a net-
-# snmp alarm sub-agent for further handling. If the agent is unavailable,
-# the request will timeout after 2 seconds and be dropped.
+Users should use the alarm_manager to get an instance of the alarm they
+wish to raise, then use its set and clear methods to update alarm state.
 
+The module also exposes constants expressing alarm severities.
+"""
+# Note, the class structure is based on the alarm objects in cpp-common.
+# The two implementations should be kept in step where possible.
 import logging
 import atexit
 from monotonic import monotonic
@@ -63,9 +71,8 @@ class _AlarmManager(threading.Thread):
     handling code.
 
     Keeps a record of all alarms and makes sure they are re-raised
-    periodically.
+    evert RE_SYNC_INTERVAL seconds.
     """
-    # Interval in seconds.
     RE_SYNC_INTERVAL = 30
 
     def __init__(self):
@@ -77,10 +84,25 @@ class _AlarmManager(threading.Thread):
         self._running = False
 
     def get_alarm(self, issuer, alarm_handle):
+        """Get a control for an alarm.
+
+        If the alarm described by alarm_handle has a single non-cleared severity,
+        return an Alarm representing the object. If the alarm has multiple
+        severities, return a MultiSeverityAlarm.
+
+        alarm_handle should be a constant defined in alarm_constants.
+        alarm_constants is generated for a project by running alarm_writer.py
+        over the JSON alarm definition file. For all of our projects, this is
+        done as part of the build process.
+
+        Alarm handles should be of the following form:
+        `(<index_number>, <severity1>, <severity2>, ...)`
+        """
         with self._alarm_lock:
             alarm = self._alarm_registry.get((issuer, alarm_handle), None)
 
             if not alarm:
+                # See format description in docstring.
                 index = alarm_handle[0]
                 severities = alarm_handle[1:]
                 severities.remove(CLEARED)
@@ -95,6 +117,8 @@ class _AlarmManager(threading.Thread):
                 self._alarm_registry[(issuer, alarm_handle)] = alarm
                 should_start = (not self._running) and (not self._should_terminate)
 
+        # It would be wasteful to start the alarm re-sync thread with
+        # no alarms present.
         if should_start:
             self.start()
             atexit.register(self.terminate)
@@ -102,6 +126,7 @@ class _AlarmManager(threading.Thread):
         return alarm
 
     def run(self):
+        """Run loop to keep alarms in sync."""
         with self._condition:
             while True:
                 sleep_time = self._get_sleep_time()
@@ -111,16 +136,19 @@ class _AlarmManager(threading.Thread):
                 self._re_sync_alarms()
 
     def terminate(self):
+        """Stop the run loop cleanly."""
         with self._condition:
             self._should_terminate = True
             self._condition.notify()
 
     def _re_sync_alarms(self):
+        """Re-sync each alarm in the registry."""
         current_alarms = self._alarm_registry.values()
         for alarm in current_alarms:
             alarm.re_sync()
 
     def _get_sleep_time(self):
+        """Calculate how long to sleep before the next re-sync."""
         self._next_resync_time += 30
         current_time = monotonic()
         sleep_time = self._next_resync_time - current_time
@@ -143,30 +171,47 @@ class BaseAlarm(object):
         self._last_state_raised = self._clear_state
 
     def clear(self):
+        """Send the alarm's cleared state to the alarm agent."""
         self._last_state_raised = self._clear_state
         self.re_sync()
 
     def re_sync(self):
-        self._last_state_raised.notify()
+        """Send or re-send the alarm's state to the alarm agent."""
+        self._last_state_raised.issue()
 
 
 class Alarm(object):
+    """Alarm with only a single non-cleared severity.
+
+    The parameter severity should be passed a severity constant from this
+    module"""
     def __init__(self, issuer, index, severity):
         super(Alarm, self).__init__(issuer, index)
         self._alarm_state = AlarmState(issuer, index, severity)
 
     def set(self):
+        """Send the alarm's raised state to the alarm agent."""
         self._last_state_raised = self._alarm_state
         self.re_sync()
 
 
 class MultiSeverityAlarm(object):
+    """Alarm with multiple possible non-cleared severities.
+
+    The parameter severities should be passed an iterable of severity
+    constants from this module.
+    """
     def __init__(self, issuer, index, severities):
         super(MultiSeverityAlarm, self).__init__(issuer, index)
         self._severities = {severity: AlarmState(issuer, index, severity) for
                             severity in severities}
 
     def set(self, severity):
+        """Send one of the alarm's raised states to the alarm agent.
+
+        The severity must be one of the severity constants defined in this
+        module. If this alarm cannot be raised with that severity, a KeyError
+        is raised."""
         try:
             self._last_state_raised = self._severities[severity]
         except KeyError:
@@ -176,23 +221,25 @@ class MultiSeverityAlarm(object):
 
         self.re_sync()
 
-    def clear(self):
-        self._last_state_raised = self._clear_state
-        self.re_sync()
-
 
 class AlarmState(object):
+    """One of an alarm's possible states."""
     def __init__(self, issuer, index, severity):
         self.issuer = issuer
         self.index = index
         self.severity = severity
 
-    def notify(self):
+    def issue(self):
+        """Tell the alarm agent that this is the current state of the alarm."""
         identifier = '{}.{}'.format(self.index, self.severity)
         _issue_alarm(issuer, identifier)
 
 
 def _issue_alarm(process, identifier):
+    """Attempt to send an alarm to the alarm agent.
+
+    This function will time out after 2s.
+    """
     # Clearwater nodes all have clearwater-infrastructure installed.
     # It includes a command-line script that can be used to issue an alarm.
     # We import the function used by the script and re-use it.
