@@ -144,7 +144,16 @@ class _AlarmManager(threading.Thread):
     def _re_sync_alarms(self):
         """Re-sync each alarm in the registry."""
         current_alarms = self._alarm_registry.values()
+
+        # Each alarm sync may take up to 2s on failure. This could
+        # easily add up to more than the RE_SYNC_INTERVAL. In this case,
+        # an log will be written by _get_sleep_time. The expected cause
+        # of long request times is that alarm agent is not available;
+        # in this case it makes little difference which alarms we are
+        # failing to re-sync, so there is no need for timeout logic.
         for alarm in current_alarms:
+            if self._should_terminate:
+                break
             alarm.re_sync()
 
     def _get_sleep_time(self):
