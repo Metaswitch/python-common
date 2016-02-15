@@ -128,6 +128,10 @@ class _AlarmManager(threading.Thread):
         # no alarms present.
         if should_start:
             self.start()
+
+            # Note, this creates a reference to the alarm_manager, which
+            # means that it will not be cleaned up until exit. This is
+            # fine for a singleton which is expected to run until exit.
             atexit.register(self.terminate)
 
         return alarm
