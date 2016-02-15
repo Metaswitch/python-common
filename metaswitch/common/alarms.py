@@ -105,6 +105,7 @@ class _AlarmManager(threading.Thread):
         Alarm handles should be of the following form:
         `(<index_number>, <severity1>, <severity2>, ...)`
         """
+        # Prevent two threads from creating the same alarm object.
         with self._registry_lock:
             alarm = self._alarm_registry.get((issuer, alarm_handle), None)
 
