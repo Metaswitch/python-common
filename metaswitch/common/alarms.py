@@ -49,6 +49,7 @@ import logging
 import atexit
 from monotonic import monotonic
 import threading
+import weakref
 import imp
 from alarm_severities import (CLEARED,
                               INDETERMINATE,
@@ -76,6 +77,12 @@ class _AlarmManager(threading.Thread):
     RE_SYNC_INTERVAL = 30
 
     def __init__(self):
+        super(_AlarmManager, self).__init__()
+
+        # Make the thread daemon so that the process can exit while the
+        # alarm loop is still running. This means that users don't need
+        # to terminate the alarm_manager explicitly.
+        self.daemon = True
         self._alarm_registry = {}
         self._condition = threading.Condition()
         self._registry_lock = threading.Lock()
@@ -98,13 +105,13 @@ class _AlarmManager(threading.Thread):
         Alarm handles should be of the following form:
         `(<index_number>, <severity1>, <severity2>, ...)`
         """
-        with self._alarm_lock:
+        with self._registry_lock:
             alarm = self._alarm_registry.get((issuer, alarm_handle), None)
 
             if not alarm:
                 # See format description in docstring.
                 index = alarm_handle[0]
-                severities = alarm_handle[1:]
+                severities = list(alarm_handle[1:])
                 severities.remove(CLEARED)
 
                 if len(severities) == 1:
@@ -132,14 +139,23 @@ class _AlarmManager(threading.Thread):
                 sleep_time = self._get_sleep_time()
                 self._condition.wait(sleep_time)
                 if self._should_terminate:
-                    break;
+                    break
                 self._re_sync_alarms()
+
+            # Tell the terminating thread that it's safe to
+            # exit.
+            self._condition.notify()
 
     def terminate(self):
         """Stop the run loop cleanly."""
         with self._condition:
             self._should_terminate = True
             self._condition.notify()
+
+            # Wait for the run loop to finish. It should finish
+            # after 2s as this is when an attempt to send a message
+            # times out. Give it a couple of extra seconds, then exit.
+            self._condition.wait(4)
 
     def _re_sync_alarms(self):
         """Re-sync each alarm in the registry."""
@@ -170,12 +186,12 @@ class _AlarmManager(threading.Thread):
 
         return sleep_time
 
+
 alarm_manager = _AlarmManager()
 
 
 class BaseAlarm(object):
     def __init__(self, issuer, index):
-        _alarm_manager.register(self)
         self._clear_state = AlarmState(issuer, index, CLEARED)
         self._last_state_raised = self._clear_state
 
@@ -189,7 +205,7 @@ class BaseAlarm(object):
         self._last_state_raised.issue()
 
 
-class Alarm(object):
+class Alarm(BaseAlarm):
     """Alarm with only a single non-cleared severity.
 
     The parameter severity should be passed a severity constant from this
@@ -204,7 +220,7 @@ class Alarm(object):
         self.re_sync()
 
 
-class MultiSeverityAlarm(object):
+class MultiSeverityAlarm(BaseAlarm):
     """Alarm with multiple possible non-cleared severities.
 
     The parameter severities should be passed an iterable of severity
