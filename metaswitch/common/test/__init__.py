@@ -36,5 +36,4 @@
 import logging
 
 # Turn on logging while debugging.
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)

@@ -63,6 +63,9 @@ _log = logging.getLogger(__name__)
 # Imported sendrequest method set up in issue_alarm.
 _sendrequest = None
 
+# How often to re-sync alarms in seconds.
+RE_SYNC_INTERVAL = 30
+
 
 class _AlarmManager(threading.Thread):
     """
@@ -74,7 +77,6 @@ class _AlarmManager(threading.Thread):
     Keeps a record of all alarms and makes sure they are re-raised
     evert RE_SYNC_INTERVAL seconds.
     """
-    RE_SYNC_INTERVAL = 30
 
     def __init__(self):
         super(_AlarmManager, self).__init__()
@@ -86,7 +88,9 @@ class _AlarmManager(threading.Thread):
         self._alarm_registry = {}
         self._condition = threading.Condition()
         self._registry_lock = threading.Lock()
-        self._next_resync_time = monotonic() + self.RE_SYNC_INTERVAL
+
+        # The re-sync code with nudge this forward by RE_SYNC_INTERVAL.
+        self._next_resync_time = monotonic()
         self._should_terminate = False
         self._running = False
 
@@ -141,18 +145,28 @@ class _AlarmManager(threading.Thread):
         """Run loop to keep alarms in sync."""
         with self._condition:
             while True:
-                sleep_time = self._get_sleep_time()
-                self._condition.wait(sleep_time)
+                sleep_time = self._update_resync_time()
+
+                # Cope with the fact that we may be woken up early and
+                # have to sleep again.
+                while (sleep_time > 0):
+                    self._condition.wait(sleep_time)
+                    if self._should_terminate:
+                        break
+                    sleep_time = self._next_resync_time - monotonic()
+
                 if self._should_terminate:
                     break
                 self._re_sync_alarms()
 
             # Tell the terminating thread that it's safe to
             # exit.
+            _log.info('Alarm manager shut down.')
             self._condition.notify()
 
     def terminate(self):
         """Stop the run loop cleanly."""
+        _log.info('Shutting down alarm manager.')
         with self._condition:
             self._should_terminate = True
             self._condition.notify()
@@ -160,6 +174,7 @@ class _AlarmManager(threading.Thread):
             # Wait for the run loop to finish. It should finish
             # after 2s as this is when an attempt to send a message
             # times out. Give it a couple of extra seconds, then exit.
+            _log.info('Waiting for alarm manager to quiesce.')
             self._condition.wait(4)
 
     def _re_sync_alarms(self):
@@ -173,21 +188,23 @@ class _AlarmManager(threading.Thread):
         # in this case it makes little difference which alarms we are
         # failing to re-sync, so there is no need for timeout logic.
         for alarm in current_alarms:
-            if self._should_terminate:
+            if self._should_terminate: # pragma: no cover
+                # There is no way of ensuring that we hit this condition.
                 break
             alarm.re_sync()
 
-    def _get_sleep_time(self):
+    def _update_resync_time(self):
         """Calculate how long to sleep before the next re-sync."""
         self._next_resync_time += 30
         current_time = monotonic()
         sleep_time = self._next_resync_time - current_time
 
         if sleep_time <= 0:
-            _log.error('Missed alarm re-sync time by %ds', -sleep_time)
-            skips = ((sleep_time / self.RE_SYNC_INTERVAL) + 1)
-            self._next_resync_time += skips * self.RE_SYNC_INTERVAL
-            sleep_time = next_resync_time - current_time
+            missed_by = -sleep_time
+            _log.error('Missed alarm re-sync time by %ds', missed_by)
+            skips = ((missed_by / RE_SYNC_INTERVAL) + 1)
+            self._next_resync_time += (skips * RE_SYNC_INTERVAL)
+            sleep_time = self._next_resync_time - current_time
 
         return sleep_time
 
@@ -233,6 +250,8 @@ class MultiSeverityAlarm(BaseAlarm):
     """
     def __init__(self, issuer, index, severities):
         super(MultiSeverityAlarm, self).__init__(issuer, index)
+        assert len(severities) >= 2, 'Must have multiple severities.'
+        assert CLEARED not in severities, 'Severities must not include CLEARED.'
         self._severities = {severity: AlarmState(issuer, index, severity) for
                             severity in severities}
 
@@ -262,7 +281,7 @@ class AlarmState(object):
     def issue(self):
         """Tell the alarm agent that this is the current state of the alarm."""
         identifier = '{}.{}'.format(self.index, self.severity)
-        _issue_alarm(issuer, identifier)
+        _issue_alarm(self.issuer, identifier)
 
 
 def _issue_alarm(process, identifier):
@@ -278,7 +297,9 @@ def _issue_alarm(process, identifier):
     # for the target module.
     global _sendrequest
     if _sendrequest is None:
-        try:
+        try: # pragma: no cover
+            # We can't rely on this file being present in unit tests so don't
+            # test this clause.
             file, pathname, description = imp.find_module("alarms", ["/usr/share/clearwater/bin"])
             mod = imp.load_module("alarms", file, pathname, description)
             _sendrequest = mod.sendrequest

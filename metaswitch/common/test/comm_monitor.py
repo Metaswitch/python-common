@@ -1,4 +1,4 @@
-# @file throttler.py
+# @file comm_monitor.py
 #
 # Project Clearwater - IMS in the Cloud
 # Copyright (C) 2013  Metaswitch Networks Ltd
