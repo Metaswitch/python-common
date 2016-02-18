@@ -53,6 +53,7 @@ valid_causes = ["software_error",
                 "database_inconsistency",
                 "underlying_resource_unavailable"]
 
+
 # Read in the alarms from a JSON file, and write out the alarm IDs
 # with their index/severity
 def parse_alarms_file(json_file):
@@ -109,6 +110,7 @@ def parse_alarms_file(json_file):
 
     except KeyError as e:
         print "Invalid JSON format - missing mandatory value {}".format(e)
+        raise
 
     return alarm_details
 
