@@ -31,7 +31,7 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 import json
 
-# Valid severity levels - this should be kept in sync with the 
+# Valid severity levels - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
 # Alarms are stored in ITU Alarm Table using the severities below.
 # Alarm Model Table stores alarms according to their state. The
@@ -39,17 +39,17 @@ import json
 # section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4
 # The function AlarmTableDef::state() maps severities to states.
 
-valid_severity = {"cleared": "1", 
-                  "indeterminate": "2", 
-                  "critical": "3", 
-                  "major": "4", 
-                  "minor": "5", 
+valid_severity = {"cleared": "1",
+                  "indeterminate": "2",
+                  "critical": "3",
+                  "major": "4",
+                  "minor": "5",
                   "warning": "6"}
 
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
-valid_causes = ["software_error", 
-                "database_inconsistency", 
+valid_causes = ["software_error",
+                "database_inconsistency",
                 "underlying_resource_unavailable"]
 
 # Read in the alarms from a JSON file, and write out the alarm IDs
@@ -67,6 +67,9 @@ def parse_alarms_file(json_file):
     # - have a cause that matches an allowed cause
     # - have a severity that matches an allowed severity
     # - have the description/details text be less than 256 characters.
+    # - have a more detailed cause text.
+    # - have an effect text.
+    # - have an action text.
     try:
         for alarm in alarms['alarms']:
             name = alarm['name']
@@ -82,6 +85,9 @@ def parse_alarms_file(json_file):
      "Details length was greater than 255 characters in alarm {}".format(name)
                 assert len(level['description']) < 256, \
      "Description length was greater than 255 characters in alarm {}".format(name)
+                assert level['cause']
+                assert level['effect']
+                assert level['action']
 
                 severity = level['severity'].lower()
                 assert severity in valid_severity.keys(), \
@@ -113,10 +119,10 @@ def parse_alarms_file(json_file):
 
 def write_constants_file(alarm_names, constants_file):
     # We've successfully parsed the alarms file. Now write the
-    # alarm IDs to file. 
-    f = open(constants_file, 'w')    
+    # alarm IDs to file.
+    f = open(constants_file, 'w')
     for key in alarm_names:
-        f.write(key + " = \"" + alarm_names[key] + "\"\n") 
+        f.write(key + " = \"" + alarm_names[key] + "\"\n")
     f.close()
 
 # Read in the alarms from a JSON file, and write out the alarm IDs
