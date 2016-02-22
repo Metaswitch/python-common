@@ -85,9 +85,12 @@ def parse_alarms_file(json_file):
      "Details length was greater than 255 characters in alarm {}".format(name)
                 assert len(level['description']) < 256, \
      "Description length was greater than 255 characters in alarm {}".format(name)
-                assert level['cause']
-                assert level['effect']
-                assert level['action']
+
+                # Check these fields exist - if not, a KeyError will be raised
+                # and caught further down.
+                level['cause']
+                level['effect']
+                level['action']
 
                 severity = level['severity'].lower()
                 assert severity in valid_severity.keys(), \
