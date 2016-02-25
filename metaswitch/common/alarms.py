@@ -69,13 +69,13 @@ RE_SYNC_INTERVAL = 30
 
 class _AlarmManager(threading.Thread):
     """
-    Singleton iterface to alarm code.
+    Singleton interface to alarm code.
 
     Use the instance alarm_manager as the single entry point into alarm
     handling code.
 
     Keeps a record of all alarms and makes sure they are re-raised
-    evert RE_SYNC_INTERVAL seconds.
+    every RE_SYNC_INTERVAL seconds.
     """
 
     def __init__(self):
@@ -89,7 +89,8 @@ class _AlarmManager(threading.Thread):
         self._condition = threading.Condition()
         self._registry_lock = threading.Lock()
 
-        # The re-sync code with nudge this forward by RE_SYNC_INTERVAL.
+        # The re-sync code with nudge this forward by RE_SYNC_INTERVAL so no
+        # need to increment on initialization.
         self._next_resync_time = monotonic()
         self._should_terminate = False
         self._running = False
@@ -183,7 +184,7 @@ class _AlarmManager(threading.Thread):
 
         # Each alarm sync may take up to 2s on failure. This could
         # easily add up to more than the RE_SYNC_INTERVAL. In this case,
-        # an log will be written by _get_sleep_time. The expected cause
+        # a log will be written by _get_sleep_time. The expected cause
         # of long request times is that alarm agent is not available;
         # in this case it makes little difference which alarms we are
         # failing to re-sync, so there is no need for timeout logic.

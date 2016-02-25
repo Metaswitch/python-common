@@ -60,9 +60,7 @@ class CMTestCase(unittest.TestCase):
         # Move time forwards and report a success. We should clear that alarm.
         mock_time.return_value = 3000
         cm.inform_success()
-        mock_alarm.clear.assert_called_with()
-
-
+        mock_alarm.clear.assert_called_once_with()
 
 if __name__ == "__main__":
     unittest.main()

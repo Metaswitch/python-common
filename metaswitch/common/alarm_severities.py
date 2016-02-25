@@ -1,7 +1,7 @@
 # @file alarm_severities.py
 #
 # Project Clearwater - IMS in the Cloud
-# Copyright (C) 2015 Metaswitch Networks Ltd
+# Copyright (C) 2016 Metaswitch Networks Ltd
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -32,17 +32,21 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-# This module defines the shared alarm severity definitions used by the
-# different parts of the alarm code. It is not possible to put these in
-# alarms.py as the alarm_parser needs access to these, and cannot import
-# alarms as it needs to run too early in the build process.
+"""
+Defines the shared alarm severity definitions used by the package.
+"""
+# It is not possible to put these in alarms.py as the alarm_parser needs
+# access to these, and cannot import alarms as it needs to run too early in
+# the build process.
 
-# valid severity levels - this should be kept in sync with the
-# list in alarmdefinition.h in cpp-common
-# alarms are stored in itu alarm table using the severities below.
-# alarm model table stores alarms according to their state. the
-# mapping between state and severity is described in rfc 3877
-# section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4.
+"""
+Valid severity levels. This should be kept in sync with the
+list in alarmdefinition.h in cpp-common.
+Alarms are stored in ITU alarm table using the severities below.
+The alarm model table stores alarms according to their state. The
+mapping between state and severity is described in RFC 3877
+section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4.
+"""
 CLEARED = 1
 INDETERMINATE = 2
 CRITICAL = 3

@@ -32,13 +32,13 @@
 import json
 import alarm_severities
 
-# valid severity levels - this should be kept in sync with the
+# Valid severity levels - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
-# alarms are stored in itu alarm table using the severities below.
-# alarm model table stores alarms according to their state. the
-# mapping between state and severity is described in rfc 3877
+# Alarms are stored in ITU Alarm Table using the severities below.
+# Alarm Model Table stores alarms according to their state. The
+# mapping between state and severity is described in RFC 3877
 # section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4
-# the function alarmtabledef::state() maps severities to states.
+# The function AlarmTableDef::state() maps severities to states.
 
 valid_severity = {"cleared": alarm_severities.CLEARED,
                   "indeterminate": alarm_severities.INDETERMINATE,

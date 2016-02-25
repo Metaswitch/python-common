@@ -214,7 +214,17 @@ class TestAlarmManagerReSync(unittest.TestCase):
     @mock.patch('metaswitch.common.alarms._sendrequest')
     @mock.patch('metaswitch.common.alarms.atexit', autospec=True)
     def test_terminate(self, mock_atexit, mock_sendrequest):
-        """Check that alarm manager termination takes under 5s."""
+        """Check that alarm manager termination takes under 5s.
+
+        5s is a tolerable period to wait on shutdown. Any longer will start
+        to be noticed.
+
+        If this test fails, some stack traces may be printed to screen
+        when the current test process exits."""
+        # The strategy for this test is to kick off termination in another
+        # thread, then wait 5s for it to finish. If it does not terminate,
+        # we can't guarantee that we can clean it up, so just leave it
+        # running.
         alarm_manager = _AlarmManager()
         alarm_manager.start()
 
@@ -237,7 +247,7 @@ class TestAlarmManagerReSync(unittest.TestCase):
         """Check that the alarm manager sends alarms after 30s."""
         try:
             # Start at 0 during initialization.
-            # Check that we account for the 5s delay in getting started.
+            # Check that we account for a 5s delay in getting started.
             # After 29s, no alarms should be raised.
             # After 30s, they should be.
             # Give one more value to allow the alarm_manager to start
