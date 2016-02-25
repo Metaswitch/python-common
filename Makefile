@@ -73,13 +73,12 @@ clean: envclean pyclean
 pyclean:
 	find . -name \*.pyc -exec rm -f {} \;
 	rm -rf *.egg-info dist
-	rm -rf $(EGG_DIR)
 	rm -f .coverage
 	rm -rf htmlcov/
 
 .PHONY: envclean
 envclean:
-	rm -rf bin eggs develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
+	rm -rf bin .eggs .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
 	rm metaswitch/common/_cffi.so *.o libclearwaterutils.a
