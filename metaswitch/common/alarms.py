@@ -128,7 +128,12 @@ class _AlarmManager(threading.Thread):
                     raise ValueError('alarm_handle must contain a severity.')
 
                 self._alarm_registry[(issuer, alarm_handle)] = alarm
-                should_start = (not self._running) and (not self._should_terminate)
+                should_start = ((not self._running) and
+                                (not self._should_terminate))
+
+                # Make sure that no other thread tries to start the thread
+                # as threads must only be started once.
+                self._running = True
 
         # It would be wasteful to start the alarm re-sync thread with
         # no alarms present.

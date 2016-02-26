@@ -297,3 +297,15 @@ class TestAlarmManagerReSync(unittest.TestCase):
 
         finally:
             alarm_manager.safe_terminate()
+
+    @mock.patch('metaswitch.common.alarms._sendrequest')
+    @mock.patch('metaswitch.common.alarms.atexit', autospec=True)
+    def test_start_once(self, mock_atexit, mock_sendrequest):
+        """Test that the alarm manager thread starts once and only once."""
+        alarm_manager = TestAlarmManager()
+
+        with mock.patch.object(alarm_manager, 'start') as mock_start:
+            alarm_manager.get_alarm('DummyIssuer', (1000, CLEARED, 4))
+            alarm_manager.get_alarm('DummyIssuer', (2000, CLEARED, 6))
+
+        mock_start.assert_called_once_with()
