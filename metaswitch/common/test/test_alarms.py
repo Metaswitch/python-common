@@ -131,19 +131,6 @@ class TestMultiSeverityAlarm(unittest.TestCase):
         alarm = MultiSeverityAlarm('TestIssuer', 1000, [3, 6])
         self.assertRaises(KeyError, alarm.set, 5)
 
-    @mock.patch('metaswitch.common.alarms._sendrequest')
-    def test_bad_severities(self, mock_sendrequest):
-        """Check that bad severities are caught."""
-        # There must be at least 2 severities.
-        self.assertRaises(AssertionError,
-                          MultiSeverityAlarm, 'TestIssuer', 1000, [])
-        self.assertRaises(AssertionError,
-                          MultiSeverityAlarm, 'TestIssuer', 1000, [5])
-
-        # Cleared severity is not allowed.
-        self.assertRaises(AssertionError,
-                          MultiSeverityAlarm, 'TestIssuer', 1000, [CLEARED, 6])
-
 
 class TestAlarmManagerGetAlarm(unittest.TestCase):
     @mock.patch('threading.Condition', autospec=True)

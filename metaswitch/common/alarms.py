@@ -251,8 +251,6 @@ class MultiSeverityAlarm(BaseAlarm):
     """
     def __init__(self, issuer, index, severities):
         super(MultiSeverityAlarm, self).__init__(issuer, index)
-        assert len(severities) >= 2, 'Must have multiple severities.'
-        assert CLEARED not in severities, 'Severities must not include CLEARED.'
         self._severities = {severity: AlarmState(issuer, index, severity) for
                             severity in severities}
 
