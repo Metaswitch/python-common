@@ -56,13 +56,13 @@ build_common_egg: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
 ${ENV_DIR}/.eggs_installed : $(ENV_DIR)/bin/python setup.py $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	# Generate .egg files for python-common
 	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
-	
+
 	# Download the egg files they depend upon
 	${ENV_DIR}/bin/easy_install -zmaxd .eggs/ .eggs/*.egg
-	
+
 	# Install the downloaded egg files
 	${ENV_DIR}/bin/easy_install --allow-hosts=None -f .eggs/ .eggs/*.egg
-	
+
 	# Touch the sentinel file
 	touch $@
 
@@ -78,7 +78,7 @@ pyclean:
 
 .PHONY: envclean
 envclean:
-	rm -rf bin eggs develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
+	rm -rf bin .eggs .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
 	rm metaswitch/common/_cffi.so *.o libclearwaterutils.a
