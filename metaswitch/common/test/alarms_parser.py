@@ -57,7 +57,7 @@ class AlarmsParserTestCase(unittest.TestCase):
 
     def testMissingMandatoryValue(self):
         self.assertRaisesRegexp(KeyError,
-                                "'severity'",
+                                "'cause'",
                                 parse_alarms_file,
                                 'metaswitch/common/test/test_missing_mandatory_value.json')
 
