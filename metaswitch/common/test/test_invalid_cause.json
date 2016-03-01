@@ -6,14 +6,20 @@
             "cause": "NOT_CAUSE",
             "levels": [
                 {
-                  "severity": "CLEARED",
-                  "description": "description",
-                  "details": "details"
+                    "severity": "CLEARED",
+                    "description": "description",
+                    "details": "details",
+                    "cause": "Cause",
+                    "effect": "Effect",
+                    "action": "Action"
                 },
                 {
-                  "severity": "CRITICAL",
-                  "description": "description",
-                  "details": "details"
+                    "severity": "CRITICAL",
+                    "description": "description",
+                    "details": "details",
+                    "cause": "Cause",
+                    "effect": "Effect",
+                    "action": "Action"
                 }
             ]
         }

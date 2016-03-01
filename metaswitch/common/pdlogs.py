@@ -39,7 +39,7 @@ class PDLog(object):
     LOG_ERR = syslog.LOG_ERR
 
     # The following must be kept in sync with
-    # https://github.com/Metaswitch/cpp-common/blob/dev/include/pdlog.h
+    # https://github.com/Metaswitch/cpp-common/blob/master/include/pdlog.h
     CL_CPP_COMMON_ID = 1000
     CL_SPROUT_ID = 2000
     CL_CHRONOS_ID = 3000
@@ -49,10 +49,11 @@ class PDLog(object):
     CL_ASTAIRE_ID = 7000
     CL_CLUSTER_MGR_ID = 8000
     CL_CONFIG_MGR_ID = 9000
-    # Ranges 10000 to 11999 are reserved
+    # Range 10000 to 11999 is reserved
     CL_PYTHON_COMMON_ID = 12000
     CL_CREST_ID = 13000
     CL_QUEUE_MGR_ID = 14000
+    # Range 15000 to 15999 is reserved
 
     def __init__(self, number, desc, cause, effect, action, priority):
         """Defines a particular log's priority and log text.
