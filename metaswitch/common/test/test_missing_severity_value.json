@@ -1,0 +1,26 @@
+{
+    "alarms": [
+        {
+            "name": "NAME",
+            "index": 1000,
+            "cause": "SOFTWARE_ERROR",
+            "levels": [
+                {
+                  "description": "description",
+                  "details": "details",
+                  "cause": "cause",
+                  "effect": "effect",
+                  "action": "action"
+                },
+                {
+                  "severity": "MAJOR",
+                  "description": "description",
+                  "details": "details",
+                  "cause": "cause",
+                  "effect": "effect",
+                  "action": "action"
+                }
+            ]
+        }
+    ]
+}

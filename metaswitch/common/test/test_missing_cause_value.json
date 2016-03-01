@@ -8,12 +8,17 @@
                 {
                   "severity": "CLEARED",
                   "description": "description",
-                  "details": "details"
+                  "details": "details",
+                  "effect": "effect",
+                  "action": "action"
                 },
                 {
                   "severity": "MAJOR",
                   "description": "description",
-                  "details": "details"
+                  "details": "details",
+                  "cause": "cause",
+                  "effect": "effect",
+                  "action": "action"
                 }
             ]
         }

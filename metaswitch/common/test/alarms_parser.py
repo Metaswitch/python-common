@@ -57,9 +57,21 @@ class AlarmsParserTestCase(unittest.TestCase):
 
     def testMissingMandatoryValue(self):
         self.assertRaisesRegexp(KeyError,
+                                "'severity'",
+                                parse_alarms_file,
+                                'metaswitch/common/test/test_missing_severity_value.json')
+        self.assertRaisesRegexp(KeyError,
                                 "'cause'",
                                 parse_alarms_file,
-                                'metaswitch/common/test/test_missing_mandatory_value.json')
+                                'metaswitch/common/test/test_missing_cause_value.json')
+        self.assertRaisesRegexp(KeyError,
+                                "'effect'",
+                                parse_alarms_file,
+                                'metaswitch/common/test/test_missing_effect_value.json')
+        self.assertRaisesRegexp(KeyError,
+                                "'action'",
+                                parse_alarms_file,
+                                'metaswitch/common/test/test_missing_action_value.json')
 
     def testRenderSimpleAlarm(self):
         """Check that a single-severity alarm can be rendered."""
