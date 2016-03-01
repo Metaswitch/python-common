@@ -33,12 +33,9 @@
 # as those licenses appear in the file license-openssl.
 import unittest
 import mock
-import imp
-import atexit
 import threading
 import time
 import logging
-import threading
 
 _log = logging.getLogger()
 
@@ -178,7 +175,7 @@ class TestAlarmManagerGetAlarm(unittest.TestCase):
         alarm_manager = _AlarmManager()
 
         # We don't want to start it re-sending alarms.
-        with mock.patch.object(alarm_manager, 'start') as mock_start:
+        with mock.patch.object(alarm_manager, 'start'):
             # No data.
             self.assertRaises(Exception,
                               alarm_manager.get_alarm,

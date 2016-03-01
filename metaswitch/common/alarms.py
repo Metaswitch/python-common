@@ -49,7 +49,6 @@ import logging
 import atexit
 from monotonic import monotonic
 import threading
-import weakref
 import imp
 from alarm_severities import (CLEARED,
                               INDETERMINATE,
@@ -59,6 +58,18 @@ from alarm_severities import (CLEARED,
                               WARNING)
 
 _log = logging.getLogger(__name__)
+
+
+def unused_variable(*names):
+    """Mark variables as unused to avoid flake8 warnings."""
+
+unused_variable(CLEARED,
+                INDETERMINATE,
+                CRITICAL,
+                MAJOR,
+                MINOR,
+                INDETERMINATE,
+                WARNING)
 
 # Imported sendrequest method set up in issue_alarm.
 _sendrequest = None
