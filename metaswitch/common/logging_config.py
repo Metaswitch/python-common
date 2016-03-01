@@ -38,6 +38,12 @@ from datetime import datetime
 import logging
 from logging.handlers import BaseRotatingHandler
 
+# Make the same log formatters available to test code, event though
+# it doesn't want to use the full logging config.
+THREAD_FORMAT = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d (thread %(threadName)s): %(message)s', "%d-%m-%Y %H:%M:%S")
+NO_THREAD_FORMAT = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
+
+
 def getCurrentFilename(currentTime, log_dir, prefix):
     filename = "{prefix}_{year}{month:02}{day:02}T{hour:02}0000Z.txt".format(prefix=prefix,
                                                                              year=currentTime.year,
@@ -82,9 +88,9 @@ def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=
         root_log.removeHandler(h)
 
     if show_thread:
-        fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d (thread %(threadName)s): %(message)s', "%d-%m-%Y %H:%M:%S")
+        fmt = THREAD_FORMAT
     else:
-        fmt = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
+        fmt = NO_THREAD_FORMAT
 
     fmt.converter = time.gmtime
     handler = ClearwaterLogHandler(log_dir, log_prefix)
@@ -103,3 +109,32 @@ def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=
 
     # Install exception handler
     sys.excepthook = exception_logging_handler
+
+
+def configure_test_logging():
+    """Utility function to configure logging for unit tests.
+
+    If environment variable NOISY is defined, logging will be at debug
+    level. Otherwise, it will be at error level.
+
+    If environment variable LOGFILE is defined, logs will be output
+    to the named file. Otherwise, they will be sent to stderr.
+
+    This function will remove any previously configured handlers."""
+    level = logging.DEBUG if os.getenv('NOISY') else logging.ERROR
+    logfile = os.getenv('LOGFILE')
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+    for handler in root_logger.handlers:
+        root_logger.removeHandler(handler)
+
+    if logfile:
+        file_handler = logging.FileHandler(logfile)
+        file_handler.setLevel(level)
+        file_handler.setFormatter(THREAD_FORMAT)
+        root_logger.addHandler(file_handler)
+    else:
+        stream_handler = logging.StreamHandler(sys.stderr)
+        stream_handler.setLevel(level)
+        root_logger.addHandler(stream_handler)

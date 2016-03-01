@@ -34,16 +34,15 @@
 
 import logging
 from threading import Lock
-from alarms import issue_alarm
+from alarms import alarm_manager
 from monotonic_time import monotonic_time
 
 _log = logging.getLogger(__name__)
 
 class CommunicationMonitor(object):
-    def __init__(self, process, raise_identifier, clear_identifier, raise_pd, clear_pd):
-        self._process = process
-        self._raise_identifier = raise_identifier
-        self._clear_identifier = clear_identifier
+    def __init__(self, process, alarm_handle, raise_pd, clear_pd):
+        self._alarm = alarm_manager.get_alarm(process, alarm_handle)
+        self._alarm_handle = alarm_handle
         self._raise_pd = raise_pd
         self._clear_pd = clear_pd
         self.succeeded = 0
@@ -54,15 +53,15 @@ class CommunicationMonitor(object):
 
     def set_alarm(self):
         self.alarmed = True
-        _log.warning("Raising alarm {}".format(self._raise_identifier))
+        _log.warning("Raising alarm %s.", self._alarm_handle)
         self._raise_pd.log()
-        issue_alarm(self._process, self._raise_identifier)
+        self._alarm.set()
 
     def clear_alarm(self):
         self.alarmed = False
-        _log.warning("Clearing alarm {}".format(self._clear_identifier))
+        _log.warning("Clearing alarm %s.", self._alarm_handle)
         self._clear_pd.log()
-        issue_alarm(self._process, self._clear_identifier)
+        self._alarm.clear()
 
     def update_alarm_state(self):
         now = monotonic_time()
@@ -88,5 +87,3 @@ class CommunicationMonitor(object):
     def inform_failure(self):
         self.failed += 1
         self.update_alarm_state()
-
-
