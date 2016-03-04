@@ -33,12 +33,9 @@
 # as those licenses appear in the file license-openssl.
 import unittest
 import mock
-import imp
-import atexit
 import threading
 import time
 import logging
-import threading
 
 _log = logging.getLogger()
 
@@ -50,13 +47,30 @@ from metaswitch.common.alarms import (AlarmState,
                                       _AlarmManager)
 
 
+class TimeoutError(Exception):
+    """Timed out waiting for the run loop to complete."""
+
+
 class TestAlarmManager(_AlarmManager):
     """AlarmManager with extra test function."""
 
-    def wake_up(self):
-        """Force the alarm manager to check whether to re-sync."""
+    def loop_done_hook(self):
+        """Callback to notify the test code that the loop has completed."""
         with self._condition:
+            self._awake = False
             self._condition.notify()
+
+    def wake_up(self):
+        """Force the alarm manager to cycle through its run loop.
+
+        Wait up to 5s seconds for the run loop to complete. If it does not,
+        then raise a TimeoutError."""
+        with self._condition:
+            self._awake = True
+            self._condition.notify()
+            self._condition.wait(5)
+            if self._awake:
+                raise TimeoutError
 
     def safe_terminate(self):
         """Terminate on another thread to avoid hanging."""
@@ -178,7 +192,7 @@ class TestAlarmManagerGetAlarm(unittest.TestCase):
         alarm_manager = _AlarmManager()
 
         # We don't want to start it re-sending alarms.
-        with mock.patch.object(alarm_manager, 'start') as mock_start:
+        with mock.patch.object(alarm_manager, 'start'):
             # No data.
             self.assertRaises(Exception,
                               alarm_manager.get_alarm,
@@ -249,15 +263,11 @@ class TestAlarmManagerReSync(unittest.TestCase):
 
             # Get an alarm to prompt the alarm manager to start.
             alarm_manager.get_alarm('DummyIssuer', (1000, CLEARED, 6))
+
             alarm_manager.wake_up()
-
-
-            # Give the manager time to run.
-            time.sleep(0.1)
             self.assertFalse(mock_sendrequest.called)
 
             alarm_manager.wake_up()
-            time.sleep(0.1)
             self.assertTrue(mock_sendrequest.called)
 
         finally:
@@ -285,14 +295,11 @@ class TestAlarmManagerReSync(unittest.TestCase):
 
             # Get an alarm to prompt the alarm manager to start.
             alarm_manager.get_alarm('DummyIssuer', (1000, CLEARED, 6))
-            alarm_manager.wake_up()
 
-            # Give the manager time to run.
-            time.sleep(0.1)
+            alarm_manager.wake_up()
             self.assertFalse(mock_sendrequest.called)
 
             alarm_manager.wake_up()
-            time.sleep(0.1)
             self.assertTrue(mock_sendrequest.called)
 
         finally:

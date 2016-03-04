@@ -49,7 +49,6 @@ import logging
 import atexit
 from monotonic import monotonic
 import threading
-import weakref
 import imp
 from alarm_severities import (CLEARED,
                               INDETERMINATE,
@@ -59,6 +58,18 @@ from alarm_severities import (CLEARED,
                               WARNING)
 
 _log = logging.getLogger(__name__)
+
+
+def unused_variable(*names):
+    """Mark variables as unused to avoid flake8 warnings."""
+
+unused_variable(CLEARED,
+                INDETERMINATE,
+                CRITICAL,
+                MAJOR,
+                MINOR,
+                INDETERMINATE,
+                WARNING)
 
 # Imported sendrequest method set up in issue_alarm.
 _sendrequest = None
@@ -156,6 +167,7 @@ class _AlarmManager(threading.Thread):
                 # Cope with the fact that we may be woken up early and
                 # have to sleep again.
                 while (sleep_time > 0):
+                    self.loop_done_hook()
                     self._condition.wait(sleep_time)
                     if self._should_terminate:
                         break
@@ -168,6 +180,7 @@ class _AlarmManager(threading.Thread):
             # Tell the terminating thread that it's safe to
             # exit.
             _log.info('Alarm manager shut down.')
+            self.loop_done_hook()
             self._condition.notify()
 
     def terminate(self):
@@ -182,6 +195,13 @@ class _AlarmManager(threading.Thread):
             # times out. Give it a couple of extra seconds, then exit.
             _log.info('Waiting for alarm manager to quiesce.')
             self._condition.wait(4)
+
+    def loop_done_hook(self):
+        """Hook for subclasses to override to run code each runloop cycle.
+
+        This allows test subclasses to wait for a single loop of the main
+        runloop, then test the result."""
+        pass
 
     def _re_sync_alarms(self):
         """Re-sync each alarm in the registry."""
