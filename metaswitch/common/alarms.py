@@ -121,6 +121,11 @@ class _AlarmManager(threading.Thread):
         Alarm handles should be of the following form:
         `(<index_number>, <severity1>, <severity2>, ...)`
         """
+
+        # We only want to start if we're not already running and we have an
+        # alarm, so we define this flag to track those criteria.
+        should_start = False
+
         # Prevent two threads from creating the same alarm object.
         with self._registry_lock:
             alarm = self._alarm_registry.get((issuer, alarm_handle), None)
