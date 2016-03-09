@@ -273,6 +273,7 @@ class TestAlarmManagerReSync(unittest.TestCase):
         finally:
             alarm_manager.safe_terminate()
 
+    @unittest.skip("Issue #44")
     @mock.patch('metaswitch.common.alarms.monotonic')
     @mock.patch('metaswitch.common.alarms._sendrequest')
     @mock.patch('metaswitch.common.alarms.atexit', autospec=True)
@@ -305,6 +306,7 @@ class TestAlarmManagerReSync(unittest.TestCase):
         finally:
             alarm_manager.safe_terminate()
 
+    @unittest.skip("Issue #44")
     @mock.patch('metaswitch.common.alarms._sendrequest')
     @mock.patch('metaswitch.common.alarms.atexit', autospec=True)
     def test_start_once(self, mock_atexit, mock_sendrequest):
