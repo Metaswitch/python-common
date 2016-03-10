@@ -32,23 +32,9 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-import ctypes, os
-
-CLOCK_MONOTONIC_RAW = 4 # see <linux/time.h>
-
-class timespec(ctypes.Structure):
-    _fields_ = [
-        ('tv_sec', ctypes.c_long),
-        ('tv_nsec', ctypes.c_long)
-    ]
-
-librt = ctypes.CDLL('librt.so.1', use_errno=True)
-clock_gettime = librt.clock_gettime
-clock_gettime.argtypes = [ctypes.c_int, ctypes.POINTER(timespec)]
-
-def monotonic_time():
-    t = timespec()
-    if clock_gettime(CLOCK_MONOTONIC_RAW , ctypes.pointer(t)) != 0:
-        errno_ = ctypes.get_errno()
-        raise OSError(errno_, os.strerror(errno_))
-    return t.tv_sec + t.tv_nsec * 1e-9
+# This module previously contained a hand-rolled python function for getting
+# the time from the monotonic clock.  There is a back-port of this function
+# from Python 3 available in PyPI which is portable, so we now use that.
+# This module is maintained to avoid breaking python-common's interface.
+import monotonic
+monotonic_time = monotonic.monotonic

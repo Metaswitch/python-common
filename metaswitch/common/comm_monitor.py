@@ -35,7 +35,7 @@
 import logging
 from threading import Lock
 from alarms import alarm_manager
-from monotonic_time import monotonic_time
+from monotonic import monotonic
 
 _log = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class CommunicationMonitor(object):
         self._alarm.clear()
 
     def update_alarm_state(self):
-        now = monotonic_time()
+        now = monotonic()
         with self.mutex:
             _log.debug("Deciding whether to change alarm state - alarmed is {}, now is {}, next check time is {}, succeeded count is {}, failed count is {}"
                        .format(self.alarmed, now, self._next_check, self.succeeded, self.failed))

@@ -41,7 +41,7 @@ from metaswitch.common.pdlogs import CASSANDRA_CONNECTION_LOST, CASSANDRA_CONNEC
 
 class CMTestCase(unittest.TestCase):
     @mock.patch("metaswitch.common.comm_monitor.alarm_manager")
-    @mock.patch("metaswitch.common.comm_monitor.monotonic_time")
+    @mock.patch("metaswitch.common.comm_monitor.monotonic")
     def test_simple(self, mock_time, mock_alarm_manager):
         """Simple test of basic behaviour."""
 
