@@ -246,7 +246,7 @@ alarm_manager = _AlarmManager()
 class BaseAlarm(object):
     def __init__(self, issuer, index):
         self._clear_state = AlarmState(issuer, index, CLEARED)
-        self._last_state_raised = self._clear_state
+        self._last_state_raised = None
 
     def clear(self):
         """Send the alarm's cleared state to the alarm agent."""
@@ -255,7 +255,8 @@ class BaseAlarm(object):
 
     def re_sync(self):
         """Send or re-send the alarm's state to the alarm agent."""
-        self._last_state_raised.issue()
+        if self._last_state_raised != None:
+            self._last_state_raised.issue()
 
 
 class Alarm(BaseAlarm):
