@@ -255,7 +255,7 @@ class BaseAlarm(object):
 
     def re_sync(self):
         """Send or re-send the alarm's state to the alarm agent."""
-        if self._last_state_raised != None:
+        if self._last_state_raised is not None:
             self._last_state_raised.issue()
 
 
