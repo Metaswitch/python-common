@@ -31,6 +31,11 @@
 # "OpenSSL Licenses" means the OpenSSL License and Original SSLeay License
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
+
+# TODO This file doesn't have full code coverage - it should. Some lines are
+# temporarily excluded from coverage to make it easier to detect future
+# regressions. We should fix up the coverage when we can
+
 """
 Interface for raising and clearing alarms in Python code.
 
@@ -176,11 +181,11 @@ class _AlarmManager(threading.Thread):
                     self._condition.wait(sleep_time)
                     if self._should_terminate:
                         break
-                    sleep_time = self._next_resync_time - monotonic()
+                    sleep_time = self._next_resync_time - monotonic() # pragma: no cover
 
                 if self._should_terminate:
                     break
-                self._re_sync_alarms()
+                self._re_sync_alarms() # pragma: no cover
 
             # Tell the terminating thread that it's safe to
             # exit.
@@ -208,7 +213,7 @@ class _AlarmManager(threading.Thread):
         runloop, then test the result."""
         pass
 
-    def _re_sync_alarms(self):
+    def _re_sync_alarms(self): # pragma: no cover
         """Re-sync each alarm in the registry."""
         current_alarms = self._alarm_registry.values()
 
@@ -230,7 +235,7 @@ class _AlarmManager(threading.Thread):
         current_time = monotonic()
         sleep_time = self._next_resync_time - current_time
 
-        if sleep_time <= 0:
+        if sleep_time <= 0: # pragma: no cover
             missed_by = -sleep_time
             _log.error('Missed alarm re-sync time by %ds', missed_by)
             skips = ((missed_by / RE_SYNC_INTERVAL) + 1)

@@ -37,7 +37,7 @@ import socket
 
 def get_signalling_socket(host, port):
     fd = lib.create_connection_in_signaling_namespace(host, str(port))
-    if (fd > 0):
+    if (fd > 0): # pragma: no cover
         return socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
     else:
         return None
