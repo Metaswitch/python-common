@@ -29,6 +29,11 @@
 # "OpenSSL Licenses" means the OpenSSL License and Original SSLeay License
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
+
+# TODO This file doesn't have full code coverage - it should. Some lines are
+# temporarily excluded from coverage to make it easier to detect future
+# regressions. We should fix up the coverage when we can
+
 import json
 import alarm_severities
 
@@ -137,7 +142,7 @@ def render_alarm(name, index, severities):
                               tuple(handle_data))
 
 
-def write_constants_file(alarm_details, constants_file):
+def write_constants_file(alarm_details, constants_file): # pragma: no cover
     # We've successfully parsed the alarms file. Now write the
     # alarm IDs to file.
     f = open(constants_file, 'w')
@@ -148,6 +153,6 @@ def write_constants_file(alarm_details, constants_file):
 
 # Read in the alarms from a JSON file, and write out the alarm IDs
 # with their index/severity
-def validate_alarms_and_write_constants(json_file, constants_file):
+def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no cover
     alarm_details = parse_alarms_file(json_file)
     write_constants_file(alarm_details, constants_file)

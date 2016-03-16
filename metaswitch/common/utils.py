@@ -32,6 +32,10 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
+# TODO This repository doesn't have full code coverage - it should. Some files
+# are temporarily excluded from coverage to make it easier to detect future
+# regressions. We should fix up the coverage when we can
+
 import os
 import sys
 import re
@@ -55,7 +59,7 @@ UUID_LEN = 20
 # The length of an audible ID in decimal digits
 UUID_LEN_AUDIBLE = 4
 
-def create_secure_random_id(length=UUID_LEN):
+def create_secure_random_id(length=UUID_LEN): # pragma: no cover
     """Securely create a new secret ID, encoded as a hex string.  The ID is
        created at random but is very likely to be unique."""
     random_bytes = os.urandom(length)
@@ -191,28 +195,28 @@ def sip_uri_to_phone_number(sip_uri):
     match = re.match(_SIP_URI_REGEXP, sip_uri)
     if match:
         return match.group("number")
-    else:
+    else: # pragma: no cover
         return "Unknown"
 
 def sip_uri_to_domain(sip_uri):
     match = re.match(_SIP_URI_REGEXP, sip_uri)
     if match:
         return match.group("domain")
-    else:
+    else: # pragma: no cover
         return "Unknown"
 
-def sip_lists_to_phone_list(list_of_sip_numbers):
+def sip_lists_to_phone_list(list_of_sip_numbers): # pragma: no cover
     return [sip_uri_to_phone_number(x)
         for x in list_of_sip_numbers]
 
 
-def delete_if_exists(fn):
+def delete_if_exists(fn): # pragma: no cover
     try:
         os.unlink(fn)
     except OSError:
         pass
 
-def md5(s):
+def md5(s): # pragma: no cover
     digest = hashlib.md5()
     digest.update(s)
     return digest.hexdigest()
@@ -240,7 +244,7 @@ def decrypt_password(encoded_password, key):
     """
     encoded_password = encoded_password.encode("ASCII")
     type = encoded_password[0]
-    if type != "b":
+    if type != "b": # pragma: no cover
         raise Exception("Encoded password wasn't in supported format")
     b64_encoded = encoded_password[1:]
     num_pad_chars = (-len(b64_encoded)) % 4
@@ -315,30 +319,30 @@ def encode_query_string(params):
         k = k.encode("utf-8")
         if isinstance(v, basestring):
             v = v.encode("utf-8")
-        else:
+        else: # pragma: no cover
             v = str(v)
         kvps .append("%s=%s" % (quote(k.encode("utf-8")), quote(v.encode("utf-8"))))
     return "&".join(kvps)
 
 def append_url_params(url, **params):
     hash = None
-    if "#" in url:
+    if "#" in url: # pragma: no cover
         url, _, hash = url.partition("#")
     if url == "": url = "?"
     sep = "" if url[-1] in ("?", "&") else ("&" if "?" in url else "?")
     url = url + sep + encode_query_string(params)
-    if hash:
+    if hash: # pragma: no cover
         url = url + "#" + hash
     return url
 
-def generate_sip_password():
+def generate_sip_password(): # pragma: no cover
     return create_secure_mixed_case_human_readable_id(48)
 
-def sip_public_id_to_private(public_id):
+def sip_public_id_to_private(public_id): # pragma: no cover
     """returns the default private ID for a given public ID (by stripping any sip: prefix)"""
     return re.sub('^sip:', '', public_id)
 
-def daemonize(filename):
+def daemonize(filename): # pragma: no cover
     """
     Place application in background and exit.
     Based on http://code.activestate.com/recipes/66012-fork-a-daemon-process-on-unix/
@@ -374,7 +378,7 @@ def daemonize(filename):
     except OSError, e:
         sys.exit(1)
 
-def write_core_file(process_name, contents):
+def write_core_file(process_name, contents): # pragma: no cover
     """
     Writes contents to a "core" file named by the process and the current timestamp.
     """
@@ -389,7 +393,7 @@ def write_core_file(process_name, contents):
         # so the dump directory doesn't exist.
         _log.exception("Can't dump core - is clearwater-diags-monitor installed?")
 
-def install_sigusr1_handler(process_name):
+def install_sigusr1_handler(process_name): # pragma: no cover
     """
     Install SIGUSR1 handler to dump stack."
     """
@@ -401,7 +405,7 @@ def install_sigusr1_handler(process_name):
         write_core_file(process_name, stack_dump)
     signal.signal(signal.SIGUSR1, sigusr1_handler)
 
-def lock_and_write_pid_file(filename):
+def lock_and_write_pid_file(filename): # pragma: no cover
     """ Attempts to write a pidfile, and returns the file object (to keep it
     open and keep us holding the lock). If that pidfile is currently locked,
     raises IOError - the caller should exit at that point."""
