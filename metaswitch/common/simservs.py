@@ -32,5 +32,5 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-def default_simservs():
+def default_simservs(): #pragma: no cover
     return """<?xml version="1.0" encoding="UTF-8"?><simservs xmlns="http://uri.etsi.org/ngn/params/xml/simservs/xcap" xmlns:cp="urn:ietf:params:xml:ns:common-policy"><originating-identity-presentation active="true"/><originating-identity-presentation-restriction active="true"><default-behaviour>presentation-not-restricted</default-behaviour></originating-identity-presentation-restriction><communication-diversion active="true"><NoReplyTimer>30</NoReplyTimer><cp:ruleset/></communication-diversion><incoming-communication-barring active="true"><cp:ruleset><cp:rule id="rule0"><cp:conditions/><cp:actions><allow>true</allow></cp:actions></cp:rule></cp:ruleset></incoming-communication-barring><outgoing-communication-barring active="true"><cp:ruleset><cp:rule id="rule0"><cp:conditions/><cp:actions><allow>true</allow></cp:actions></cp:rule></cp:ruleset></outgoing-communication-barring></simservs>"""

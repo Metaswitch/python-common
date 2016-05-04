@@ -171,6 +171,8 @@ class UtilsTestCase(unittest.TestCase):
                           "foo?bif=bop&boz&bar=baz")
         self.assertEquals(append_url_params("", bar="baz"),
                           "?bar=baz")
+        self.assertEquals(append_url_params("foo#bif", bar="baz"),
+                          "foo?bar=baz#bif")
 
     def test_sip_uri_to_phone_number(self):
         self.assertEquals(sip_uri_to_phone_number("sip:1234@ngv.metaswitch.com"),

@@ -28,16 +28,14 @@ explain-style:
 test: $(ENV_DIR)/bin/python setup.py env
 	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
 
-# TODO This repository doesn't have full code coverage - it should. Some files
-# are temporarily excluded from coverage to make it easier to detect future
-# regressions. We should fix up the coverage when we can
-EXTRA_COVERAGE="metaswitch/common/logging_config.py,metaswitch/common/phonenumber_utils.py,metaswitch/common/simservs.py,metaswitch/common/ifcs.py"
+# We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
+NO_COVERAGE="metaswitch/common/alarms_writer.py"
 
 .PHONY: coverage
 coverage: $(ENV_DIR)/bin/coverage setup.py env
 	rm -rf htmlcov/
 	_env/bin/coverage erase
-	$(COMPILER_FLAGS) _env/bin/coverage run --source metaswitch --omit "**/test/**,metaswitch/common/alarms_writer.py,$(EXTRA_COVERAGE)"  setup.py test
+	$(COMPILER_FLAGS) _env/bin/coverage run --source metaswitch --omit "**/test/**,$(NO_COVERAGE)"  setup.py test
 	_env/bin/coverage report -m --fail-under 100
 	_env/bin/coverage html
 

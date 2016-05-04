@@ -1,7 +1,5 @@
-# @file setup.py
-#
 # Project Clearwater - IMS in the Cloud
-# Copyright (C) 2013  Metaswitch Networks Ltd
+# Copyright (C) 2015  Metaswitch Networks Ltd
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -32,27 +30,32 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
+import unittest
+import re
+import mock
+from metaswitch.common.logging_config import (configure_logging,
+        configure_test_logging)
 import logging
-import sys
 
-from setuptools import setup, Extension
-from logging import StreamHandler
+class LoggingTestCase(unittest.TestCase):
+    def testLogging(self):
+        with mock.patch('os.open') as mock_open:
+            configure_logging(logging.DEBUG,
+                              ".",
+                              "test_log_prefix",
+                              task_id="Fred",
+                              show_thread=True)
 
-_log = logging.getLogger("common")
-_log.setLevel(logging.DEBUG)
-_handler = StreamHandler(sys.stderr)
-_handler.setLevel(logging.DEBUG)
-_log.addHandler(_handler)
+            args, kwargs = mock_open.call_args
 
-setup(
-    name='metaswitchcommon',
-    version='0.1',
-    packages=['metaswitch', 'metaswitch.common'],
-    package_dir={'':'.'},
-    test_suite='metaswitch.common.test',
-    setup_requires=["cffi"],
-    ext_package="metaswitch.common",
-    cffi_modules=["cffi_build.py:ffi"],
-    install_requires=["py-bcrypt", "pycrypto==2.6.1", "pyzmq==15.2", "cffi==1.5.2", "monotonic==0.6"],
-    tests_require=["pbr==1.6", "Mock", "phonenumbers==7.1.1"]
-    )
+            filename_re = "\.\/test_log_prefix-Fred_\d*T\d*Z.txt"
+            match = re.compile(filename_re).match(args[0])
+            self.assertIsNotNone(match, msg="Unexpected log file name")
+            self.assertEqual(args[1], 65, msg="Unexpected log file open flags")
+            self.assertEqual(args[2], 420, msg="Unexpected log file open mode")
+
+        # Reset back to the default test logging
+        configure_test_logging()
+
+if __name__ == "__main__":
+    unittest.main()

@@ -326,12 +326,12 @@ def encode_query_string(params):
 
 def append_url_params(url, **params):
     hash = None
-    if "#" in url: # pragma: no cover
+    if "#" in url:
         url, _, hash = url.partition("#")
     if url == "": url = "?"
     sep = "" if url[-1] in ("?", "&") else ("&" if "?" in url else "?")
     url = url + sep + encode_query_string(params)
-    if hash: # pragma: no cover
+    if hash:
         url = url + "#" + hash
     return url
 
