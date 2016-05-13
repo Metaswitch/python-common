@@ -33,7 +33,7 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 
-def generate_ifcs(domain):
+def generate_ifcs(domain): #pragma: no cover
     return ('<?xml version="1.0" encoding="UTF-8"?>'
             '<ServiceProfile>'
               '<InitialFilterCriteria>'

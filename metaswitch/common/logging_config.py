@@ -59,7 +59,7 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self._logfile_prefix = logfile_prefix
         self.doRollover()
 
-    def shouldRollover(self, record):
+    def shouldRollover(self, record): #pragma: no cover
         now = int(time.time())
         return (now > self.next_file_change)
 
@@ -67,7 +67,7 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         tmpstream = self.stream
         self.stream = None
         if tmpstream:
-            tmpstream.close()
+            tmpstream.close() #pragma: no cover
         currentTime = int(time.time())
         self.baseFilename = getCurrentFilename(datetime.fromtimestamp(currentTime),
                                                self._log_directory,
@@ -89,7 +89,7 @@ def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=
 
     if show_thread:
         fmt = THREAD_FORMAT
-    else:
+    else: #pragma: no cover
         fmt = NO_THREAD_FORMAT
 
     fmt.converter = time.gmtime
@@ -98,7 +98,7 @@ def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=
     handler.setLevel(log_level)
     root_log.addHandler(handler)
 
-    def exception_logging_handler(type, value, tb):
+    def exception_logging_handler(type, value, tb): #pragma: no cover
         root_log = logging.getLogger()
         root_log.error("""Uncaught exception:
   Exception: {0}
@@ -129,12 +129,12 @@ def configure_test_logging():
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)
 
-    if logfile:
+    if logfile: #pragma: no cover
         file_handler = logging.FileHandler(logfile)
         file_handler.setLevel(level)
         file_handler.setFormatter(THREAD_FORMAT)
         root_logger.addHandler(file_handler)
-    else:
+    else: #pragma: no cover
         stream_handler = logging.StreamHandler(sys.stderr)
         stream_handler.setLevel(level)
         root_logger.addHandler(stream_handler)

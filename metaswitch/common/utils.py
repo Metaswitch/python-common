@@ -32,10 +32,6 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-# TODO This repository doesn't have full code coverage - it should. Some files
-# are temporarily excluded from coverage to make it easier to detect future
-# regressions. We should fix up the coverage when we can
-
 import os
 import sys
 import re
@@ -326,12 +322,12 @@ def encode_query_string(params):
 
 def append_url_params(url, **params):
     hash = None
-    if "#" in url: # pragma: no cover
+    if "#" in url:
         url, _, hash = url.partition("#")
     if url == "": url = "?"
     sep = "" if url[-1] in ("?", "&") else ("&" if "?" in url else "?")
     url = url + sep + encode_query_string(params)
-    if hash: # pragma: no cover
+    if hash:
         url = url + "#" + hash
     return url
 
