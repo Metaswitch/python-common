@@ -32,10 +32,6 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-# TODO This file doesn't have full code coverage - it should. Some lines are
-# temporarily excluded from coverage to make it easier to detect future
-# regressions. We should fix up the coverage when we can
-
 """
 Interface for raising and clearing alarms in Python code.
 
