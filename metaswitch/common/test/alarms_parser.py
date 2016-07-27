@@ -43,6 +43,14 @@ class AlarmsParserTestCase(unittest.TestCase):
         self.assertIn(CLEARED, test_alarm[2], msg="No cleared state.")
         self.assertIn(CRITICAL, test_alarm[2], msg="No critical state.")
 
+    def testExtendedValidFile(self):
+        alarms = parse_alarms_file('metaswitch/common/test/test_extended_alarm.json')
+        test_alarm = alarms[0]
+        self.assertEqual(test_alarm[0], 'NAME', msg="Incorrect name.")
+        self.assertEqual(test_alarm[1], 1000, msg="Incorrect index.")
+        self.assertIn(CLEARED, test_alarm[2], msg="No cleared state.")
+        self.assertIn(CRITICAL, test_alarm[2], msg="No critical state.")
+
     def testInvalidCause(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Cause \(NOT_CAUSE\) invalid in alarm NAME",
