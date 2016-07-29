@@ -102,20 +102,20 @@ def parse_alarms_file(json_file):
                 # optional. We should only check they are under 4096 characters
                 # in the case where they exist.
                 try:
-                    level['extended details']
+                    level['extended_details']
                 except KeyError:
                     # Valid to not have extended details
                     pass
                 else:
-                    assert len(level['extended details']) < 4096, \
+                    assert len(level['extended_details']) < 4096, \
         "Extended details length was greater than 4096 characters in alarm {}".format(name)
                 try:
-                    level['extended description']
+                    level['extended_description']
                 except KeyError:
                     # Valid to not have an extended description
                     pass
                 else:
-                    assert len(level['extended description']) < 4096, \
+                    assert len(level['extended_description']) < 4096, \
         "Extended description length was greater than 4096 characters in alarm {}".format(name)
 
                 # Check these fields exist - if not, a KeyError will be raised
