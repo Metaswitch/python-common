@@ -12,8 +12,8 @@
                     "cause": "Cause",
                     "effect": "Effect",
                     "action": "Action",
-                    "extended details": "Extended details",
-                    "extended description": "Extended description"
+                    "extended_details": "Extended details",
+                    "extended_description": "Extended description"
                 },
                 {
                     "severity": "CRITICAL",
@@ -22,8 +22,8 @@
                     "cause": "Cause",
                     "effect": "Effect",
                     "action": "Action",
-                    "extended details": "Extended details",
-                    "extended description": "Extended description"
+                    "extended_details": "Extended details",
+                    "extended_description": "Extended description"
                 }
             ]
         }

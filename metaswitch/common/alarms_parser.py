@@ -98,6 +98,7 @@ def parse_alarms_file(json_file):
      "Effect length was greater than 4096 characters in alarm {}".format(name)
                 assert len(level['action']) < 4096, \
      "Action length was greater than 4096 characters in alarm {}".format(name)
+                
                 # The extended details and extended descriptions fields are
                 # optional. We should only check they are under 4096 characters
                 # in the case where they exist.
