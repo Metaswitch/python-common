@@ -43,6 +43,47 @@ class AlarmsParserTestCase(unittest.TestCase):
         self.assertIn(CLEARED, test_alarm[2], msg="No cleared state.")
         self.assertIn(CRITICAL, test_alarm[2], msg="No critical state.")
 
+    def testDetailsTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Details length was greater than 255 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/details_too_long.json')   
+    
+    def testDescriptionTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Description length was greater than 255 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/desc_too_long.json')   
+    
+    def testCauseTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Cause length was greater than 4096 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/cause_too_long.json')   
+    
+    def testEffectTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Effect length was greater than 4096 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/effect_too_long.json')   
+    
+    def testActionTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Action length was greater than 4096 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/action_too_long.json')
+    
+    def testExtendedDetailsTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Extended details length was greater than 4096 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/extended_details_too_long.json')
+    
+    def testExtendedDescriptionTooLong(self):
+        self.assertRaisesRegexp(AssertionError,
+                                "Extended description length was greater than 4096 characters in alarm NAME",
+                                parse_alarms_file,
+                                'metaswitch/common/test/extended_description_too_long.json')
     def testInvalidCause(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Cause \(NOT_CAUSE\) invalid in alarm NAME",
