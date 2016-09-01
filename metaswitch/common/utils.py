@@ -391,7 +391,7 @@ def write_core_file(process_name, contents): # pragma: no cover
 
 def install_sigusr1_handler(process_name): # pragma: no cover
     """
-    Install SIGUSR1 handler to dump stack."
+    Install SIGUSR1 handler to dump stack.
     """
     def sigusr1_handler(sig, stack):
         """
@@ -400,6 +400,29 @@ def install_sigusr1_handler(process_name): # pragma: no cover
         stack_dump = "Caught SIGUSR1\n" + "".join(traceback.format_stack(stack))
         write_core_file(process_name, stack_dump)
     signal.signal(signal.SIGUSR1, sigusr1_handler)
+
+def map_clearwater_log_level(level):
+    """
+    Map from Clearwater log levels to Python log levels.
+
+    Python doesn't have status or verbose levels, so these are mapped to
+    info and debug respectively.
+    """
+    LOG_LEVELS = {0: logging.ERROR,
+                  1: logging.WARNING,
+                  2: logging.INFO,
+                  3: logging.INFO,
+                  4: logging.DEBUG,
+                  5: logging.DEBUG}
+
+    level = int(level)
+
+    if level < 0:
+        level = 0
+    elif level > 5:
+        level = 5
+
+    return LOG_LEVELS[level]
 
 def lock_and_write_pid_file(filename): # pragma: no cover
     """ Attempts to write a pidfile, and returns the file object (to keep it
