@@ -177,15 +177,28 @@ class UtilsTestCase(unittest.TestCase):
                           "foo?bar=baz#bif")
 
     def test_map_clearwater_log_level(self):
-        self.assertEquals(map_clearwater_log_level(-1), logging.ERROR)
+        # Error
         self.assertEquals(map_clearwater_log_level(0), logging.ERROR)
-        self.assertEquals(map_clearwater_log_level(1), logging.WARNING)
-        self.assertEquals(map_clearwater_log_level(2), logging.INFO)
-        self.assertEquals(map_clearwater_log_level(3), logging.INFO)
-        self.assertEquals(map_clearwater_log_level(4), logging.DEBUG)
-        self.assertEquals(map_clearwater_log_level(5), logging.DEBUG)
-        self.assertEquals(map_clearwater_log_level(50), logging.DEBUG)
 
+        # Warning
+        self.assertEquals(map_clearwater_log_level(1), logging.WARNING)
+
+        # Status
+        self.assertEquals(map_clearwater_log_level(2, False), logging.WARNING)
+        self.assertEquals(map_clearwater_log_level(2, True), logging.INFO)
+        self.assertEquals(map_clearwater_log_level(2), logging.INFO)
+
+        # Info
+        self.assertEquals(map_clearwater_log_level(3), logging.INFO)
+
+        # Verbose
+        self.assertEquals(map_clearwater_log_level(4), logging.DEBUG)
+
+        # Debug
+        self.assertEquals(map_clearwater_log_level(5), logging.DEBUG)
+
+        self.assertEquals(map_clearwater_log_level(-1), logging.ERROR)
+        self.assertEquals(map_clearwater_log_level(50), logging.DEBUG)
 
     def test_sip_uri_to_phone_number(self):
         self.assertEquals(sip_uri_to_phone_number("sip:1234@ngv.metaswitch.com"),

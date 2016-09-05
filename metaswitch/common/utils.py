@@ -401,16 +401,17 @@ def install_sigusr1_handler(process_name): # pragma: no cover
         write_core_file(process_name, stack_dump)
     signal.signal(signal.SIGUSR1, sigusr1_handler)
 
-def map_clearwater_log_level(level):
+def map_clearwater_log_level(level, status_as_info = True):
     """
     Map from Clearwater log levels to Python log levels.
 
-    Python doesn't have status or verbose levels, so these are mapped to
-    info and debug respectively.
+    Python doesn't have status or verbose levels. Verbose is mapped to debug,
+    and status is mapped to either info or warning, depending on the caller's
+    requirements.
     """
     LOG_LEVELS = {0: logging.ERROR,
                   1: logging.WARNING,
-                  2: logging.INFO,
+                  2: logging.INFO if status_as_info else logging.WARNING,
                   3: logging.INFO,
                   4: logging.DEBUG,
                   5: logging.DEBUG}
