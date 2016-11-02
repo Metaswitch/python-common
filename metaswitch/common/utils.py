@@ -32,10 +32,6 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-# TODO This repository doesn't have full code coverage - it should. Some files
-# are temporarily excluded from coverage to make it easier to detect future
-# regressions. We should fix up the coverage when we can
-
 import os
 import sys
 import re
@@ -326,12 +322,12 @@ def encode_query_string(params):
 
 def append_url_params(url, **params):
     hash = None
-    if "#" in url: # pragma: no cover
+    if "#" in url:
         url, _, hash = url.partition("#")
     if url == "": url = "?"
     sep = "" if url[-1] in ("?", "&") else ("&" if "?" in url else "?")
     url = url + sep + encode_query_string(params)
-    if hash: # pragma: no cover
+    if hash:
         url = url + "#" + hash
     return url
 
@@ -395,7 +391,7 @@ def write_core_file(process_name, contents): # pragma: no cover
 
 def install_sigusr1_handler(process_name): # pragma: no cover
     """
-    Install SIGUSR1 handler to dump stack."
+    Install SIGUSR1 handler to dump stack.
     """
     def sigusr1_handler(sig, stack):
         """
@@ -404,6 +400,30 @@ def install_sigusr1_handler(process_name): # pragma: no cover
         stack_dump = "Caught SIGUSR1\n" + "".join(traceback.format_stack(stack))
         write_core_file(process_name, stack_dump)
     signal.signal(signal.SIGUSR1, sigusr1_handler)
+
+def map_clearwater_log_level(level, status_as_info = True):
+    """
+    Map from Clearwater log levels to Python log levels.
+
+    Python doesn't have status or verbose levels. Verbose is mapped to debug,
+    and status is mapped to either info or warning, depending on the caller's
+    requirements.
+    """
+    LOG_LEVELS = {0: logging.ERROR,
+                  1: logging.WARNING,
+                  2: logging.INFO if status_as_info else logging.WARNING,
+                  3: logging.INFO,
+                  4: logging.DEBUG,
+                  5: logging.DEBUG}
+
+    level = int(level)
+
+    if level < 0:
+        level = 0
+    elif level > 5:
+        level = 5
+
+    return LOG_LEVELS[level]
 
 def lock_and_write_pid_file(filename): # pragma: no cover
     """ Attempts to write a pidfile, and returns the file object (to keep it

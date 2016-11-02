@@ -32,6 +32,7 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
+import logging
 import unittest
 from metaswitch.common.utils import _HUMAN_SAFE_ALPHABET, _URL_SAFE_ALPHABET, \
     create_secure_mixed_case_human_readable_id
@@ -47,6 +48,7 @@ from metaswitch.common.utils import (create_secure_human_readable_id,
                                      append_url_params,
                                      sip_uri_to_phone_number,
                                      sip_uri_to_domain,
+                                     map_clearwater_log_level,
                                      _pad,
                                      _un_pad)
 
@@ -171,6 +173,32 @@ class UtilsTestCase(unittest.TestCase):
                           "foo?bif=bop&boz&bar=baz")
         self.assertEquals(append_url_params("", bar="baz"),
                           "?bar=baz")
+        self.assertEquals(append_url_params("foo#bif", bar="baz"),
+                          "foo?bar=baz#bif")
+
+    def test_map_clearwater_log_level(self):
+        # Error
+        self.assertEquals(map_clearwater_log_level(0), logging.ERROR)
+
+        # Warning
+        self.assertEquals(map_clearwater_log_level(1), logging.WARNING)
+
+        # Status
+        self.assertEquals(map_clearwater_log_level(2, False), logging.WARNING)
+        self.assertEquals(map_clearwater_log_level(2, True), logging.INFO)
+        self.assertEquals(map_clearwater_log_level(2), logging.INFO)
+
+        # Info
+        self.assertEquals(map_clearwater_log_level(3), logging.INFO)
+
+        # Verbose
+        self.assertEquals(map_clearwater_log_level(4), logging.DEBUG)
+
+        # Debug
+        self.assertEquals(map_clearwater_log_level(5), logging.DEBUG)
+
+        self.assertEquals(map_clearwater_log_level(-1), logging.ERROR)
+        self.assertEquals(map_clearwater_log_level(50), logging.DEBUG)
 
     def test_sip_uri_to_phone_number(self):
         self.assertEquals(sip_uri_to_phone_number("sip:1234@ngv.metaswitch.com"),

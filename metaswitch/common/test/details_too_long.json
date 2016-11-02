@@ -1,0 +1,28 @@
+{
+    "alarms": [
+        {
+            "index": 1000,
+            "cause": "UNDERLYING_RESOURCE_UNAVAILABLE",
+            "name": "NAME",
+            "levels": [
+                {
+                    "severity": "CLEARED",
+                    "description": "Description",
+                    "details": "Details",
+                    "cause": "Cause",
+                    "effect": "Effect",
+                    "action": "Action"
+                },
+                {
+                    "severity": "WARNING",
+                    "details": "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                    "description": "Description",
+                    "cause": "Cause",
+                    "effect": "Effect",
+                    "action": "Action"
+                }
+            ]
+        }
+    ]
+}
+
