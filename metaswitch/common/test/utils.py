@@ -46,6 +46,7 @@ from metaswitch.common.utils import (create_secure_human_readable_id,
                                      hash_password,
                                      is_password_correct,
                                      append_url_params,
+                                     safely_encode,
                                      sip_uri_to_phone_number,
                                      sip_uri_to_domain,
                                      map_clearwater_log_level,
@@ -209,6 +210,11 @@ class UtilsTestCase(unittest.TestCase):
                           "abc.ngv.metaswitch.com")
         self.assertEquals(sip_uri_to_domain("sip:1234@xyz.ngv.metaswitch.com;gobbledygook"),
                           "xyz.ngv.metaswitch.com")
+
+    def test_safely_encode(self):
+        self.assertEquals(safely_encode(None), None)
+        self.assertEquals(safely_encode(u'ASCII'), 'ASCII')
+        self.assertEquals(safely_encode(u'\x80nonASCII'), '\xc2\x80nonASCII')
 
 if __name__ == "__main__":
     unittest.main()
