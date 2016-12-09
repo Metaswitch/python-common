@@ -449,3 +449,9 @@ def lock_and_write_pid_file(filename): # pragma: no cover
 
     return lockfile
 
+def safely_encode(string):
+    result = None
+    if string:
+        result = string.encode("utf-8", errors="replace")
+    return result
+
