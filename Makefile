@@ -45,8 +45,7 @@ env: ${ENV_DIR}/.eggs_installed
 $(ENV_DIR)/bin/python:
 	# Set up a fresh virtual environment
 	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
-	# We need to pull down >= 17.1 as Mock depends on it. We should probably find out why it wasn't working when set to version 0.7, as mock should have pulled what it needed.
-	$(ENV_DIR)/bin/easy_install "setuptools>=17.1"
+	$(ENV_DIR)/bin/easy_install "setuptools==24"
 	$(ENV_DIR)/bin/easy_install distribute
 	$(ENV_DIR)/bin/pip install cffi
 
