@@ -145,7 +145,7 @@ class AlarmLevel(object):
             "Severity level ({}) invalid in alarm {}".format(level['severity'], name)
 
         self._itu_severity = itu_severities[severity]
-        self._oid = self._parent._index + oid_severities[severity]
+        self._oid = str(self._parent._index) + "." + str(oid_severities[severity])
         self._severity_string = level['severity']
 
 
