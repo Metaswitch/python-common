@@ -48,12 +48,12 @@ itu_severities = {"cleared": alarm_severities.CLEARED,
                   "minor": alarm_severities.MINOR,
                   "warning": alarm_severities.WARNING}
 
-oid_severities = {"cleared": 1,
-                  "indeterminate": 2,
-                  "critical": 3,
-                  "major": 4,
-                  "minor": 5,
-                  "warning": 6}
+alarm_model_state = {"cleared": 1,
+                     "indeterminate": 2,
+                     "critical": 6,
+                     "major": 5,
+                     "minor": 4,
+                     "warning": 3}
 
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
@@ -145,7 +145,7 @@ class AlarmLevel(object):
             "Severity level ({}) invalid in alarm {}".format(level['severity'], name)
 
         self._itu_severity = itu_severities[severity]
-        self._oid = str(self._parent._index) + "." + str(oid_severities[severity])
+        self._oid = str(self._parent._index) + "." + str(alarm_model_state[severity])
         self._severity_string = level['severity']
 
 
@@ -234,7 +234,7 @@ def alarms_to_dita(title, alarms):
     writer.end_section()
     return writer._xml
 
-def write_alarm_dita_doc(json_file, dita_file):
+def write_alarm_dita_doc(json_file, dita_file): # pragma: no cover
     alarm_list = parse_alarms_file(json_file)
     xml = alarms_to_dita(json_file, alarm_list)
 

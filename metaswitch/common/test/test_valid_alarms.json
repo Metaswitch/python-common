@@ -16,7 +16,9 @@
                 {
                     "severity": "CRITICAL",
                     "description": "description",
+                    "extended_description": "extended description",
                     "details": "details",
+                    "extended_details": "extended details",
                     "cause": "Cause",
                     "effect": "Effect",
                     "action": "Action"

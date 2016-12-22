@@ -31,7 +31,6 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 import unittest
-import json
 from metaswitch.common.alarms import CLEARED, CRITICAL
 from metaswitch.common.alarms_parser import parse_alarms_file, render_alarm, alarms_to_dita
 
@@ -44,8 +43,12 @@ class AlarmsParserTestCase(unittest.TestCase):
         self.assertIn(CLEARED, test_alarm._levels.keys(), msg="No cleared state.")
         self.assertIn(CRITICAL, test_alarm._levels.keys(), msg="No critical state.")
         self.assertEqual(render_alarm(test_alarm), 'NAME = (1000, 1, 3)\n')
-        self.assertEqual(alarms_to_dita("metaswitch/common/test/test_valid_alarms.json", alarms), "")
 
+    def testDita(self):
+        alarms = parse_alarms_file('metaswitch/common/test/test_valid_alarms.json')
+        expected_output = open('metaswitch/common/test/test_valid_alarms.dita').read()
+        self.assertEqual(alarms_to_dita("metaswitch/common/test/test_valid_alarms.json", alarms),
+                         expected_output)
 
     def testDetailsTooLong(self):
         self.assertRaisesRegexp(AssertionError,
