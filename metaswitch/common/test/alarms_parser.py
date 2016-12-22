@@ -31,54 +31,58 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 import unittest
+import json
 from metaswitch.common.alarms import CLEARED, CRITICAL
-from metaswitch.common.alarms_parser import parse_alarms_file, render_alarm
+from metaswitch.common.alarms_parser import parse_alarms_file, render_alarm, alarms_to_dita
 
 class AlarmsParserTestCase(unittest.TestCase):
     def testValidFile(self):
         alarms = parse_alarms_file('metaswitch/common/test/test_valid_alarms.json')
         test_alarm = alarms[0]
-        self.assertEqual(test_alarm[0], 'NAME', msg="Incorrect name.")
-        self.assertEqual(test_alarm[1], 1000, msg="Incorrect index.")
-        self.assertIn(CLEARED, test_alarm[2], msg="No cleared state.")
-        self.assertIn(CRITICAL, test_alarm[2], msg="No critical state.")
+        self.assertEqual(test_alarm._name, 'NAME', msg="Incorrect name.")
+        self.assertEqual(test_alarm._index, 1000, msg="Incorrect index.")
+        self.assertIn(CLEARED, test_alarm._levels.keys(), msg="No cleared state.")
+        self.assertIn(CRITICAL, test_alarm._levels.keys(), msg="No critical state.")
+        self.assertEqual(render_alarm(test_alarm), 'NAME = (1000, 1, 3)\n')
+        self.assertEqual(alarms_to_dita("metaswitch/common/test/test_valid_alarms.json", alarms), "")
+
 
     def testDetailsTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Details length was greater than 255 characters in alarm NAME",
                                 parse_alarms_file,
-                                'metaswitch/common/test/details_too_long.json')   
-    
+                                'metaswitch/common/test/details_too_long.json')
+
     def testDescriptionTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Description length was greater than 255 characters in alarm NAME",
                                 parse_alarms_file,
-                                'metaswitch/common/test/desc_too_long.json')   
-    
+                                'metaswitch/common/test/desc_too_long.json')
+
     def testCauseTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Cause length was greater than 4096 characters in alarm NAME",
                                 parse_alarms_file,
-                                'metaswitch/common/test/cause_too_long.json')   
-    
+                                'metaswitch/common/test/cause_too_long.json')
+
     def testEffectTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Effect length was greater than 4096 characters in alarm NAME",
                                 parse_alarms_file,
-                                'metaswitch/common/test/effect_too_long.json')   
-    
+                                'metaswitch/common/test/effect_too_long.json')
+
     def testActionTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Action length was greater than 4096 characters in alarm NAME",
                                 parse_alarms_file,
                                 'metaswitch/common/test/action_too_long.json')
-    
+
     def testExtendedDetailsTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Extended details length was greater than 4096 characters in alarm NAME",
                                 parse_alarms_file,
                                 'metaswitch/common/test/extended_details_too_long.json')
-    
+
     def testExtendedDescriptionTooLong(self):
         self.assertRaisesRegexp(AssertionError,
                                 "Extended description length was greater than 4096 characters in alarm NAME",
@@ -114,15 +118,6 @@ class AlarmsParserTestCase(unittest.TestCase):
                                 parse_alarms_file,
                                 'metaswitch/common/test/test_missing_action_value.json')
 
-    def testRenderSimpleAlarm(self):
-        """Check that a single-severity alarm can be rendered."""
-        self.assertEqual(render_alarm('Dummy_error', 1000, (1, 3)),
-                         'DUMMY_ERROR = (1000, 1, 3)\n')
-
-    def testRenderMultiAlarm(self):
-        """Check that a multi-severity alarm can be rendered."""
-        self.assertEqual(render_alarm('dummy_3rror', 1000, (1, 3, 6)),
-                         'DUMMY_3RROR = (1000, 1, 3, 6)\n')
 
 if __name__ == "__main__":
     unittest.main()
