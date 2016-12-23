@@ -32,6 +32,7 @@
 
 import json
 import alarm_severities
+from dita_content import DITAContent
 
 # Valid severity levels - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
@@ -203,7 +204,7 @@ def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no
     alarm_list = parse_alarms_file(json_file)
     write_constants_file(alarm_list, constants_file)
 
-def alarms_to_dita(title, alarms):
+def alarms_to_dita(alarms_files):
     columns = ["OID",
                "ITU_severity",
                "name",
@@ -215,73 +216,34 @@ def alarms_to_dita(title, alarms):
                "effect",
                "action"]
 
-    writer = DITATableWriter()
-    writer.begin_section(title)
-    writer.begin_table("Alarm definitions", columns)
-    for alarm in alarms:
-        for alarm_level in alarm._levels.itervalues():
-            writer.add_table_entry([alarm_level._oid,
-                                    alarm_level._itu_severity,
-                                    alarm._name,
-                                    alarm._cause,
-                                    alarm_level._severity_string,
-                                    alarm_level._description,
-                                    alarm_level._details,
-                                    alarm_level._cause,
-                                    alarm_level._effect,
-                                    alarm_level._action])
-    writer.end_table()
-    writer.end_section()
-    return writer._xml
+    dita_content = DITAContent()
+    dita_content.begin_section("Alarms")
 
-def write_alarm_dita_doc(json_file, dita_file): # pragma: no cover
-    alarm_list = parse_alarms_file(json_file)
-    xml = alarms_to_dita(json_file, alarm_list)
+    for alarm_file in alarms_files:
+        alarm_list = parse_alarms_file(alarm_file)
+        dita_content.begin_table(alarm_file, columns)
 
-    with open(dita_file, "w") as output_file:
-        output_file.write(xml)
+        for alarm in alarm_list:
+            for alarm_level in alarm._levels.itervalues():
+                dita_content.add_table_entry([alarm_level._oid,
+                                              alarm_level._itu_severity,
+                                              alarm._name,
+                                              alarm._cause,
+                                              alarm_level._severity_string,
+                                              alarm_level._description,
+                                              alarm_level._details,
+                                              alarm_level._cause,
+                                              alarm_level._effect,
+                                              alarm_level._action])
 
-class DITATableWriter(object):
-    def __init__(self):
-        self._xml = ""
+        dita_content.end_table()
 
-    def begin_section(self, doc_title):
-        self._xml += '<?xml version="1.0" encoding="UTF-8"?>\n'
-        self._xml += '<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">\n'
-        self._xml += '<concept id="concept_tdn_k5t_vw">\n'
-        self._xml += '<title>' + doc_title + '</title>\n'
-        self._xml += '<conbody>\n'
+    dita_content.end_section()
+    return dita_content._xml
 
-    def begin_table(self, title, columns):
-        self._columns = columns
-        self._xml += '<p>\n'
-        self._xml += '<table frame="all" rowsep="1" colsep="1" id="table_sqg_l5t_vw">\n'
-        self._xml += '<title>' + title + '</title>\n'
-        self._xml += '<tgroup cols="' + str(len(columns)) + '">\n'
+def write_dita_file(alarms_files, dita_filename):
+    xml = alarms_to_dita(alarms_files)
 
-        for index, column in enumerate(columns, start=1):
-            self._xml += '<colspec colname="c' + str(index) + '" colnum="' + str(index) + '" colwidth="1.0*"/>\n'
+    with open(dita_filename, "w") as dita_file:
+        dita_file.write(xml)
 
-        self._xml += '<thead>\n'
-        self._xml += '<row>\n'
-        for column in columns:
-            self._xml += '<entry>\n<p>' + column + '</p>\n</entry>\n'
-        self._xml += '</row>\n'
-        self._xml += '</thead>\n'
-        self._xml += '<tbody>\n'
-
-    def end_table(self):
-        self._xml += '</tbody>\n'
-        self._xml += '</tgroup>\n'
-        self._xml += '</table>\n'
-        self._xml += '</p>\n'
-
-    def end_section(self):
-        self._xml += '</conbody>\n'
-        self._xml += '</concept>\n'
-
-    def add_table_entry(self, data):
-        self._xml += '<row>\n'
-        for value in data:
-            self._xml += '<entry>\n<p>' + str(value) + '</p>\n</entry>\n'
-        self._xml += '</row>\n'

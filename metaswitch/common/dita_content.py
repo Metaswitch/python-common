@@ -30,15 +30,48 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
-import argparse
-from alarms_parser import write_dita_file
+class DITAContent(object):
+    def __init__(self):
+        self._xml = ""
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--alarms-files', nargs="*", type=str, required=True)
-parser.add_argument('--output-dir', type=str, required=True)
-args = parser.parse_args()
+    def begin_section(self, doc_title):
+        self._xml += '<?xml version="1.0" encoding="UTF-8"?>\n'
+        self._xml += '<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">\n'
+        self._xml += '<concept id="concept_tdn_k5t_vw">\n'
+        self._xml += '<title>' + doc_title + '</title>\n'
+        self._xml += '<conbody>\n'
 
-dita_filename = os.path.join('.', args.output_dir, 'alarms.xml')
+    def begin_table(self, title, columns):
+        self._columns = columns
+        self._xml += '<p>\n'
+        self._xml += '<table frame="all" rowsep="1" colsep="1" id="table_sqg_l5t_vw">\n'
+        self._xml += '<title>' + title + '</title>\n'
+        self._xml += '<tgroup cols="' + str(len(columns)) + '">\n'
 
-write_dita_file(args.alarms_files, dita_filename)
+        for index, column in enumerate(columns, start=1):
+            self._xml += '<colspec colname="c' + str(index) + '" colnum="' + str(index) + '" colwidth="1.0*"/>\n'
+
+        self._xml += '<thead>\n'
+        self._xml += '<row>\n'
+        for column in columns:
+            self._xml += '<entry>\n<p>' + column + '</p>\n</entry>\n'
+        self._xml += '</row>\n'
+        self._xml += '</thead>\n'
+        self._xml += '<tbody>\n'
+
+    def end_table(self):
+        self._xml += '</tbody>\n'
+        self._xml += '</tgroup>\n'
+        self._xml += '</table>\n'
+        self._xml += '</p>\n'
+
+    def end_section(self):
+        self._xml += '</conbody>\n'
+        self._xml += '</concept>\n'
+
+    def add_table_entry(self, data):
+        self._xml += '<row>\n'
+        for value in data:
+            self._xml += '<entry>\n<p>' + str(value) + '</p>\n</entry>\n'
+        self._xml += '</row>\n'
 

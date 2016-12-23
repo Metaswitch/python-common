@@ -45,9 +45,8 @@ class AlarmsParserTestCase(unittest.TestCase):
         self.assertEqual(render_alarm(test_alarm), 'NAME = (1000, 1, 3)\n')
 
     def testDita(self):
-        alarms = parse_alarms_file('metaswitch/common/test/test_valid_alarms.json')
         expected_output = open('metaswitch/common/test/test_valid_alarms.dita').read()
-        self.assertEqual(alarms_to_dita("metaswitch/common/test/test_valid_alarms.json", alarms),
+        self.assertEqual(alarms_to_dita(["metaswitch/common/test/test_valid_alarms.json"]),
                          expected_output)
 
     def testDetailsTooLong(self):
