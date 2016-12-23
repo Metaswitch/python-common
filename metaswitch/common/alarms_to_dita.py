@@ -30,7 +30,10 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
+# Simple wrapper to call the write_dita_file script with the correct arguments.
+
 import argparse
+import os
 from alarms_parser import write_dita_file
 
 parser = argparse.ArgumentParser()

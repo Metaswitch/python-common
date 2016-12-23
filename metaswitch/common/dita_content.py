@@ -30,6 +30,9 @@
 # under which the OpenSSL Project distributes the OpenSSL toolkit software,
 # as those licenses appear in the file LICENSE-OPENSSL.
 
+# Class that constructs the content of a DITA file consisting of a number of
+# simple tables.
+
 class DITAContent(object):
     def __init__(self):
         self._xml = ""
@@ -42,7 +45,6 @@ class DITAContent(object):
         self._xml += '<conbody>\n'
 
     def begin_table(self, title, columns):
-        self._columns = columns
         self._xml += '<p>\n'
         self._xml += '<table frame="all" rowsep="1" colsep="1" id="table_sqg_l5t_vw">\n'
         self._xml += '<title>' + title + '</title>\n'

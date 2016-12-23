@@ -41,7 +41,6 @@ from dita_content import DITAContent
 # mapping between state and severity is described in RFC 3877
 # section 5.4: https://tools.ietf.org/html/rfc3877#section-5.4
 # The function AlarmTableDef::state() maps severities to states.
-
 itu_severities = {"cleared": alarm_severities.CLEARED,
                   "indeterminate": alarm_severities.INDETERMINATE,
                   "critical": alarm_severities.CRITICAL,
@@ -63,6 +62,8 @@ valid_causes = ["software_error",
                 "underlying_resource_unavailable"]
 
 class Alarm(object):
+    # Takes Alarm JSON, verifies it and either throws an exception or
+    # initializes an Alarm object representing the alarm.
     def __init__(self, alarm):
         try:
             self._name = alarm['name']
@@ -97,6 +98,9 @@ class Alarm(object):
             raise
 
 class AlarmLevel(object):
+    # Takes JSON representing a specific alarm level definition, verifies it
+    # and either throws an exception or initializes an Alarm object
+    # representing the alarm.
     def __init__(self, parent_alarm, level):
 
         self._parent = parent_alarm
@@ -204,6 +208,8 @@ def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no
     alarm_list = parse_alarms_file(json_file)
     write_constants_file(alarm_list, constants_file)
 
+# Read in alarm information from a list of alarms files and generate a DITA
+# document describing the alarms.   Returns DITA as XML.
 def alarms_to_dita(alarms_files):
     columns = ["OID",
                "ITU_severity",
@@ -241,6 +247,8 @@ def alarms_to_dita(alarms_files):
     dita_content.end_section()
     return dita_content._xml
 
+# Read in alarm information from a list of alarms files and write a DITA
+# document describing them.
 def write_dita_file(alarms_files, dita_filename):
     xml = alarms_to_dita(alarms_files)
 
