@@ -249,7 +249,7 @@ def alarms_to_dita(alarms_files):
 
 # Read in alarm information from a list of alarms files and write a DITA
 # document describing them.
-def write_dita_file(alarms_files, dita_filename):
+def write_dita_file(alarms_files, dita_filename): #pragma: no cover
     xml = alarms_to_dita(alarms_files)
 
     with open(dita_filename, "w") as dita_file:
