@@ -31,7 +31,8 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 # Class that constructs the content of a DITA file consisting of a number of
-# simple tables.
+# simple tables.  For an example of a DITA file constructed using this class,
+# see test/test_valid_alarms.dita.
 
 class DITAContent(object):
     def __init__(self):

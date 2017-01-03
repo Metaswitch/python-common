@@ -42,6 +42,10 @@ class AlarmsParserTestCase(unittest.TestCase):
         self.assertEqual(test_alarm._index, 1000, msg="Incorrect index.")
         self.assertIn(CLEARED, test_alarm._levels.keys(), msg="No cleared state.")
         self.assertIn(CRITICAL, test_alarm._levels.keys(), msg="No critical state.")
+
+    def testRenderAlarm(self):
+        alarms = parse_alarms_file('metaswitch/common/test/test_valid_alarms.json')
+        test_alarm = alarms[0]
         self.assertEqual(render_alarm(test_alarm), 'NAME = (1000, 1, 3)\n')
 
     def testDita(self):
