@@ -45,13 +45,13 @@ class DITAContent(object):
         self._xml += '<title>' + doc_title + '</title>\n'
         self._xml += '<conbody>\n'
 
-    def begin_table(self, title, columns):
+    def begin_table(self, title, columns, widths):
         self._xml += '<table frame="all" rowsep="1" colsep="1">\n'
         self._xml += '<title>' + title + '</title>\n'
         self._xml += '<tgroup cols="' + str(len(columns)) + '">\n'
 
         for index, column in enumerate(columns, start=1):
-            self._xml += '<colspec colname="c' + str(index) + '" colnum="' + str(index) + '" colwidth="1.0*"/>\n'
+            self._xml += '<colspec colname="c' + str(index) + '" colnum="' + str(index) + '" colwidth="' + widths[index-1] + '"/>\n'
 
         self._xml += '<tbody>\n'
         self._xml += '<row>\n'

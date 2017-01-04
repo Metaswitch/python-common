@@ -268,7 +268,8 @@ def alarms_to_dita(alarms_files):
                           "Effect": alarm_level._effect,
                           "Action": alarm_level._action}
 
-                dita_content.begin_table(alarm._name, ["Field", "Value"])
+                dita_content.begin_table(alarm._name, ["Field", "Value"],
+                        ["25%", "75%"])
                 for field, value in fields.iteritems():
                     dita_content.add_table_entry([field, value])
                 dita_content.end_table()
