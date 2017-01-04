@@ -214,7 +214,7 @@ def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no
 # document describing the alarms.   Returns CSV as a text string.
 def alarms_to_csv(alarms_files):
     output = StringIO.StringIO()
-    writer = csv.writer(output)
+    writer = csv.writer(output, lineterminator='\n')
     columns = ["OID",
                "ITU_severity",
                "name",
