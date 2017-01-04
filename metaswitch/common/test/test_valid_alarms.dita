@@ -1,124 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
-<concept id="concept_tdn_k5t_vw">
+<concept>
 <title>Alarms</title>
 <conbody>
-<p>
-<table frame="all" rowsep="1" colsep="1" id="table_sqg_l5t_vw">
-<title>metaswitch/common/test/test_valid_alarms.json</title>
-<tgroup cols="10">
-<colspec colname="c1" colnum="1" colwidth="1.0*"/>
-<colspec colname="c2" colnum="2" colwidth="1.0*"/>
-<colspec colname="c3" colnum="3" colwidth="1.0*"/>
-<colspec colname="c4" colnum="4" colwidth="1.0*"/>
-<colspec colname="c5" colnum="5" colwidth="1.0*"/>
-<colspec colname="c6" colnum="6" colwidth="1.0*"/>
-<colspec colname="c7" colnum="7" colwidth="1.0*"/>
-<colspec colname="c8" colnum="8" colwidth="1.0*"/>
-<colspec colname="c9" colnum="9" colwidth="1.0*"/>
-<colspec colname="c10" colnum="10" colwidth="1.0*"/>
-<thead>
+<table frame="all" rowsep="1" colsep="1">
+<title>NAME</title>
+<tgroup cols="2">
+<colspec colname="c1" colnum="1" colwidth="25%"/>
+<colspec colname="c2" colnum="2" colwidth="75%"/>
+<tbody>
+<row>
+<entry>
+<p><b>Field</b></p>
+</entry>
+<entry>
+<p><b>Value</b></p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Action</p>
+</entry>
+<entry>
+<p>Action</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Severity</p>
+</entry>
+<entry>
+<p>CLEARED</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Details</p>
+</entry>
+<entry>
+<p>details</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>ITU severity</p>
+</entry>
+<entry>
+<p>1</p>
+</entry>
+</row>
 <row>
 <entry>
 <p>OID</p>
 </entry>
 <entry>
-<p>ITU_severity</p>
-</entry>
-<entry>
-<p>name</p>
-</entry>
-<entry>
-<p>cause</p>
-</entry>
-<entry>
-<p>severity</p>
-</entry>
-<entry>
-<p>description</p>
-</entry>
-<entry>
-<p>details</p>
-</entry>
-<entry>
-<p>cause</p>
-</entry>
-<entry>
-<p>effect</p>
-</entry>
-<entry>
-<p>action</p>
-</entry>
-</row>
-</thead>
-<tbody>
-<row>
-<entry>
 <p>1000.1</p>
 </entry>
-<entry>
-<p>1</p>
-</entry>
-<entry>
-<p>NAME</p>
-</entry>
-<entry>
-<p>SOFTWARE_ERROR</p>
-</entry>
-<entry>
-<p>CLEARED</p>
-</entry>
-<entry>
-<p>description</p>
-</entry>
-<entry>
-<p>details</p>
-</entry>
+</row>
+<row>
 <entry>
 <p>Cause</p>
 </entry>
 <entry>
-<p>Effect</p>
-</entry>
-<entry>
-<p>Action</p>
+<p>Cause</p>
 </entry>
 </row>
 <row>
 <entry>
-<p>1000.6</p>
-</entry>
-<entry>
-<p>3</p>
-</entry>
-<entry>
-<p>NAME</p>
-</entry>
-<entry>
-<p>SOFTWARE_ERROR</p>
-</entry>
-<entry>
-<p>CRITICAL</p>
-</entry>
-<entry>
-<p>extended description</p>
-</entry>
-<entry>
-<p>extended details</p>
-</entry>
-<entry>
-<p>Cause</p>
+<p>Effect</p>
 </entry>
 <entry>
 <p>Effect</p>
 </entry>
+</row>
+<row>
 <entry>
-<p>Action</p>
+<p>Description</p>
+</entry>
+<entry>
+<p>description</p>
 </entry>
 </row>
 </tbody>
 </tgroup>
 </table>
-</p>
+<table frame="all" rowsep="1" colsep="1">
+<title>NAME</title>
+<tgroup cols="2">
+<colspec colname="c1" colnum="1" colwidth="25%"/>
+<colspec colname="c2" colnum="2" colwidth="75%"/>
+<tbody>
+<row>
+<entry>
+<p><b>Field</b></p>
+</entry>
+<entry>
+<p><b>Value</b></p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Action</p>
+</entry>
+<entry>
+<p>Action</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Severity</p>
+</entry>
+<entry>
+<p>CRITICAL</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Details</p>
+</entry>
+<entry>
+<p>extended details</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>ITU severity</p>
+</entry>
+<entry>
+<p>3</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>OID</p>
+</entry>
+<entry>
+<p>1000.6</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Cause</p>
+</entry>
+<entry>
+<p>Cause</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Effect</p>
+</entry>
+<entry>
+<p>Effect</p>
+</entry>
+</row>
+<row>
+<entry>
+<p>Description</p>
+</entry>
+<entry>
+<p>extended description</p>
+</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 </conbody>
 </concept>
