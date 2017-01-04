@@ -1,0 +1,3 @@
+OID,ITU_severity,name,cause,severity,description,details,cause,effect,action
+1000.1,1,NAME,SOFTWARE_ERROR,CLEARED,description,details,Cause,Effect,Action
+1000.6,3,NAME,SOFTWARE_ERROR,CRITICAL,extended description,extended details,Cause,Effect,Action
