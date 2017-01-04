@@ -31,6 +31,8 @@
 # as those licenses appear in the file LICENSE-OPENSSL.
 
 import json
+import StringIO
+import csv
 import alarm_severities
 from dita_content import DITAContent
 
@@ -208,9 +210,11 @@ def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no
     alarm_list = parse_alarms_file(json_file)
     write_constants_file(alarm_list, constants_file)
 
-# Read in alarm information from a list of alarms files and generate a DITA
-# document describing the alarms.   Returns DITA as XML.
-def alarms_to_dita(alarms_files):
+# Read in alarm information from a list of alarms files and generate a CSV
+# document describing the alarms.   Returns CSV as a text string.
+def alarms_to_csv(alarms_files):
+    output = StringIO.StringIO()
+    writer = csv.writer(output)
     columns = ["OID",
                "ITU_severity",
                "name",
@@ -222,27 +226,52 @@ def alarms_to_dita(alarms_files):
                "effect",
                "action"]
 
+    writer.writerow(columns)
+
+    for alarm_file in alarms_files:
+        alarm_list = parse_alarms_file(alarm_file)
+
+        for alarm in alarm_list:
+            for alarm_level in alarm._levels.itervalues():
+                values = [alarm_level._oid,
+                          alarm_level._itu_severity,
+                          alarm._name,
+                          alarm._cause,
+                          alarm_level._severity_string,
+                          alarm_level._description,
+                          alarm_level._details,
+                          alarm_level._cause,
+                          alarm_level._effect,
+                          alarm_level._action]
+                writer.writerow(values)
+
+    return output.getvalue()
+
+# Read in alarm information from a list of alarms files and generate a DITA
+# document describing the alarms.   Returns DITA as XML.
+def alarms_to_dita(alarms_files):
     dita_content = DITAContent()
     dita_content.begin_section("Alarms")
 
     for alarm_file in alarms_files:
         alarm_list = parse_alarms_file(alarm_file)
-        dita_content.begin_table(alarm_file, columns)
 
         for alarm in alarm_list:
             for alarm_level in alarm._levels.itervalues():
-                dita_content.add_table_entry([alarm_level._oid,
-                                              alarm_level._itu_severity,
-                                              alarm._name,
-                                              alarm._cause,
-                                              alarm_level._severity_string,
-                                              alarm_level._description,
-                                              alarm_level._details,
-                                              alarm_level._cause,
-                                              alarm_level._effect,
-                                              alarm_level._action])
+                fields = {"OID": alarm_level._oid,
+                          "ITU severity": alarm_level._itu_severity,
+                          "Cause": alarm._cause,
+                          "Severity": alarm_level._severity_string,
+                          "Description": alarm_level._description,
+                          "Details": alarm_level._details,
+                          "Cause": alarm_level._cause,
+                          "Effect": alarm_level._effect,
+                          "Action": alarm_level._action}
 
-        dita_content.end_table()
+                dita_content.begin_table(alarm._name, ["Field", "Value"])
+                for field, value in fields.iteritems():
+                    dita_content.add_table_entry([field, value])
+                dita_content.end_table()
 
     dita_content.end_section()
     return dita_content._xml
@@ -254,4 +283,12 @@ def write_dita_file(alarms_files, dita_filename): #pragma: no cover
 
     with open(dita_filename, "w") as dita_file:
         dita_file.write(xml)
+
+# Read in alarm information from a list of alarms files and write a CSV
+# document describing them.
+def write_csv_file(alarms_files, csv_filename): #pragma: no cover
+    output = alarms_to_csv(alarms_files)
+
+    with open(csv_filename, "w") as csv_file:
+        csv_file.write(output)
 
