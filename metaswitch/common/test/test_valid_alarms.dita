@@ -4,7 +4,7 @@
 <title>Alarms</title>
 <conbody>
 <table frame="all" rowsep="1" colsep="1">
-<title>NAME</title>
+<title>NAME: CLEARED</title>
 <tgroup cols="2">
 <colspec colname="c1" colnum="1" colwidth="25%"/>
 <colspec colname="c2" colnum="2" colwidth="75%"/>
@@ -85,7 +85,7 @@
 </tgroup>
 </table>
 <table frame="all" rowsep="1" colsep="1">
-<title>NAME</title>
+<title>NAME: CRITICAL</title>
 <tgroup cols="2">
 <colspec colname="c1" colnum="1" colwidth="25%"/>
 <colspec colname="c2" colnum="2" colwidth="75%"/>
