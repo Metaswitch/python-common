@@ -1,14 +1,14 @@
 # Copyright (C) 2016 Metaswitch Networks Ltd. All rights reserved.
 '''
-A Script to produce documentation for the Project Clearwater MIB file, requires
-the location of the MIB file and a list of details the user wishes to print in
-the tables.
+A Script to generate DITA documentation of stats from a MIB file.
+
 Required packages:
 -SNMP Translate
 
 The script works by taking in a MIB file and running it through SNMP translate to
 obtain the details and OID's available. It then builds a dictionary of objects of
-class Statistic and then prints out the relevant data as XML.
+class Statistic and then prints out the relevant data as DITA files.   Run with
+-h to see the list of necessary parameters.
 
 '''
 import subprocess
