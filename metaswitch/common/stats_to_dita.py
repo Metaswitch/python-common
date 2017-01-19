@@ -214,14 +214,14 @@ if __name__ == '__main__':
                     ' DITA documents describing them.')
     parser.add_argument('filename', metavar='FILENAME',
                         help='The MIB file you wish to generate your document from')
-    parser.add_argument('--oid_base_len', action='store',
+    parser.add_argument('--oid-base-len', action='store',
                         help='The length of the base OID -- an output file will'
                              ' be generated for each OID with length'
-                             ' oid_base_len.   All OIDs with length <'
-                             ' oid_base_len will be ignored.')
-    parser.add_argument('--output_dir', action='store',
+                             ' oid-base-len.   All OIDs with length <'
+                             ' oid-base-len will be ignored.')
+    parser.add_argument('--output-dir', action='store',
                         help='The directory that the output DITA files should be written to')
-    parser.add_argument('--config_file', action='store',
+    parser.add_argument('--config-file', action='store',
                         help='An optional JSON configuration file defining'
                         ' arrays of top level objects to ignore (ignore_list),'
                         ' individual stats to whitelist (whitelist) and stats'
