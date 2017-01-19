@@ -266,7 +266,6 @@ if __name__ == '__main__':
     for table_oid in table_level_oids:
         top_level_oid = table_oid.rsplit('.', 1)[0]
         top_level_oid_name = stats[top_level_oid].get_info('SNMP NAME')
-        print "Top level OID name = %s" % top_level_oid_name
         if top_level_oid_name not in ignore_list:
             table_oid_name = stats[table_oid].get_info('SNMP NAME')
             if should_output_stat(table_oid_name):
