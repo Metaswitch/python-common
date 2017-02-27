@@ -57,6 +57,15 @@ alarm_model_state = {"cleared": 1,
                      "minor": 4,
                      "warning": 3}
 
+
+def full_alarm_oid(oid_fragment):
+    """
+    Convert OID fragments used in the alarm model into full OIDs.
+    """
+    # Prepend the OID prefix used by the alarm model for Clearwater
+    # alarms.
+    return "1.3.6.1.2.1.118.1.1.2.1.3.0." + oid_fragment
+
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
 valid_causes = ["software_error",
@@ -258,7 +267,7 @@ def alarms_to_dita(alarms_files):
 
         for alarm in alarm_list:
             for alarm_level in alarm._levels.itervalues():
-                fields = {"OID": alarm_level._oid,
+                fields = {"OID": full_alarm_oid(alarm_level._oid),
                           "ITU severity": alarm_level._itu_severity,
                           "Cause": alarm._cause,
                           "Severity": alarm_level._severity_string,
