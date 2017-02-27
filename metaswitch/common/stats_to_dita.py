@@ -81,7 +81,7 @@ class Statistic(object):
                 self.details[item] = "N/A"
 
         with open('/dev/null', 'w') as the_bin:
-            command = ['snmptranslate', '-m' 'mib_file', oid]
+            command = ['snmptranslate', '-m', mib_file, oid]
             name = subprocess.check_output(command,
                                            stderr=the_bin)
 
