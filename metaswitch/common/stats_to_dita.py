@@ -5,10 +5,10 @@ A Script to generate DITA documentation of stats from a MIB file.
 Required packages:
 -SNMP Translate
 
-The script works by taking in a MIB file and running it through SNMP translate to
-obtain the details and OID's available. It then builds a dictionary of objects of
-class Statistic and then prints out the relevant data as DITA files.   Run with
--h to see the list of necessary parameters.
+The script works by taking in a MIB file and running it through SNMP translate
+to obtain the details and OID's available. It then builds a dictionary of
+objects of class Statistic and then prints out the relevant data as DITA
+files. Run with -h to see the list of necessary parameters.
 
 '''
 import subprocess
@@ -52,6 +52,7 @@ logging.basicConfig(level=logging.ERROR,
                     format='%(funcName)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+
 class Statistic(object):
     ''' The class structure for each OID and its relevant information
     '''
@@ -59,11 +60,12 @@ class Statistic(object):
     def __init__(self, oid, mib_file, COLUMNS):
         '''
         Input
-        oid:                The specific OID for the statistic
-        mib_file:           The location of the MIB file defining the statistic
-        COLUMNS:            The properties of the statistic that we want to parse
+        oid:       The specific OID for the statistic
+        mib_file:  The location of the MIB file defining the statistic
+        COLUMNS:   The properties of the statistic that we want to parse
         '''
-        logger.info('Generating an element of class Statistic for OID: %s', oid)
+        logger.info('Generating an element of class Statistic for OID: %s',
+                    oid)
 
         self.details = {}
 
@@ -175,6 +177,7 @@ def write_dita_file(dita_filename, dita_title, table_oids, stats):
     with open(dita_filename, 'w') as output:
         output.write(dita_content._xml)
 
+
 def write_dita_table(dictionary, table_oid, dita_content):
     ''' generates a subsection containing a table in the XML
 
@@ -188,8 +191,8 @@ def write_dita_table(dictionary, table_oid, dita_content):
 
     dita_content.begin_table(table_name, heads, COLUMN_WIDTHS)
 
-    # Loop through the dictionary of all stats finding those that belong to this
-    # table.
+    # Loop through the dictionary of all stats finding those that belong to
+    # this table.
     for oid in sorted(dictionary):
         stat = dictionary[oid]
         if (oid.startswith(table_oid + '.') or (oid == table_oid)):
@@ -209,15 +212,18 @@ def write_dita_table(dictionary, table_oid, dita_content):
 
     dita_content.end_table()
 
+
 def should_output_stat(stat_name):
     if (white_list is None) and (black_list is None):
         return True
     if (white_list is not None) and (black_list is not None):
         if (stat_name in white_list) and (stat_name in black_list):
-            logger.error("Error: Stat %s is defined in both the whitelist and blacklist" % stat_name)
+            logger.error("Error: Stat %s is defined in both the whitelist "
+                         "and blacklist", stat_name)
             sys.exit(1)
         if (stat_name not in white_list) and (stat_name not in black_list):
-            logger.error("Error: Stat %s is not defined in either the whitelist or blacklist" % stat_name)
+            logger.error("Error: Stat %s is not defined in either the "
+                         "whitelist or blacklist", stat_name)
             sys.exit(1)
         return stat_name in white_list
     if (white_list is not None):
@@ -229,20 +235,28 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Translates a MIB file for a set of statistics to a set of'
                     ' DITA documents describing them.')
-    parser.add_argument('filename', metavar='FILENAME',
-                        help='The MIB file you wish to generate your document from')
-    parser.add_argument('--oid-base-len', action='store',
-                        help='The length of the base OID -- an output file will'
-                             ' be generated for each OID with length'
-                             ' oid-base-len.   All OIDs with length <'
-                             ' oid-base-len will be ignored.')
-    parser.add_argument('--output-dir', action='store',
-                        help='The directory that the output DITA files should be written to')
-    parser.add_argument('--config-file', action='store',
-                        help='An optional JSON configuration file defining'
-                        ' arrays of top level objects to ignore (ignore_list),'
-                        ' individual stats to whitelist (whitelist) and stats'
-                        ' to blacklist (blacklist).')
+    parser.add_argument(
+        'filename',
+        metavar='FILENAME',
+        help='The MIB file you wish to generate your document from')
+    parser.add_argument(
+        '--oid-base-len',
+        action='store',
+        help='The length of the base OID -- an output file will'
+             ' be generated for each OID with length'
+             ' oid-base-len.   All OIDs with length <'
+             ' oid-base-len will be ignored.')
+    parser.add_argument(
+        '--output-dir',
+        action='store',
+        help='The directory that the output DITA files should be written to')
+    parser.add_argument(
+        '--config-file',
+        action='store',
+        help='An optional JSON configuration file defining'
+             ' arrays of top level objects to ignore (ignore_list),'
+             ' individual stats to whitelist (whitelist) and stats'
+             ' to blacklist (blacklist).')
     args = vars(parser.parse_args())
 
     if args['output_dir']:
@@ -290,7 +304,7 @@ if __name__ == '__main__':
 
     for file_oid, table_oids in file_and_table_oids.iteritems():
         file_oid_name = stats[file_oid].get_info('SNMP NAME')
-        write_dita_file(output_name + '_' +  file_oid_name + '.xml',
+        write_dita_file(output_name + '_' + file_oid_name + '.xml',
                         file_oid_name,
                         table_oids,
                         stats)
