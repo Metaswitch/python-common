@@ -81,8 +81,10 @@ class Statistic(object):
                 self.details[item] = "N/A"
 
         with open('/dev/null', 'w') as the_bin:
-            name = subprocess.check_output('snmptranslate -m ' + mib_file + ' ' +
-                                           oid, stderr=the_bin, shell=True)
+            command = ['snmptranslate', '-m' 'mib_file', oid]
+            name = subprocess.check_output(command,
+                                           stderr=the_bin)
+
         # name is in the form  MID_FILE_NAME::snmp name
         self.details['SNMP NAME'] = name.split('::')[1].strip()
         self.details['OID'] = oid.strip()
@@ -109,10 +111,10 @@ class Statistic(object):
                                 single word or all words enclosed within {} or
                                 "".
         '''
-        get_details_cmd = 'snmptranslate -m ' + mib_file + ' -Td ' + oid
+        get_details_cmd = ['snmptranslate', '-m', mib_file, '-Td', oid]
         with open('/dev/null', 'w') as the_bin:
-            detail_string = subprocess.check_output(
-                get_details_cmd, stderr=the_bin, shell=True)
+            detail_string = subprocess.check_output(get_details_cmd,
+                                                    stderr=the_bin)
 
         in_quotes = False
         in_braces = False
@@ -142,8 +144,9 @@ def generate_oid_list(input_file):
     '''
     logger.info('Generating_OID_list from file: %s', input_file)
     with open('/dev/null', 'w') as the_bin:
-        oid_string = subprocess.check_output(
-            'snmptranslate -m ' + input_file + ' -To', stderr=the_bin, shell=True)
+        command = ['snmptranslate', '-m', input_file, '-To']
+        oid_string = subprocess.check_output(command,
+                                             stderr=the_bin)
         oid_list = oid_string.split()
     logger.debug('Generated OID list %s', oid_list)
     return oid_list
