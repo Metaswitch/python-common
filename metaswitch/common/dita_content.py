@@ -34,13 +34,18 @@
 # simple tables.  For an example of a DITA file constructed using this class,
 # see test/test_valid_alarms.dita.
 
+DOCTYPE_TAG = ('<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN"'
+               '"concept.dtd">\n')
+COLSPEC_TAG = '<colspec colname="c {0!s}" colnum="{1!s}" colwidth="{2}"/>\n'
+
+
 class DITAContent(object):
     def __init__(self):
         self._xml = ""
 
     def begin_section(self, doc_title):
         self._xml += '<?xml version="1.0" encoding="UTF-8"?>\n'
-        self._xml += '<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">\n'
+        self._xml += DOCTYPE_TAG
         self._xml += '<concept>\n'
         self._xml += '<title>' + doc_title + '</title>\n'
         self._xml += '<conbody>\n'
@@ -51,7 +56,7 @@ class DITAContent(object):
         self._xml += '<tgroup cols="' + str(len(columns)) + '">\n'
 
         for index, column in enumerate(columns, start=1):
-            self._xml += '<colspec colname="c' + str(index) + '" colnum="' + str(index) + '" colwidth="' + widths[index-1] + '"/>\n'
+            self._xml += COLSPEC_TAG.format(index, index, widths[index - 1])
 
         self._xml += '<thead>\n'
         self._xml += '<row>\n'
@@ -75,4 +80,3 @@ class DITAContent(object):
         for value in data:
             self._xml += '<entry>\n<p>' + str(value) + '</p>\n</entry>\n'
         self._xml += '</row>\n'
-
