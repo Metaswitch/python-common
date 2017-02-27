@@ -34,9 +34,9 @@
 # simple tables.  For an example of a DITA file constructed using this class,
 # see test/test_valid_alarms.dita.
 
-DOCTYPE_TAG = ('<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN"'
+DOCTYPE_TAG = ('<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" '
                '"concept.dtd">\n')
-COLSPEC_TAG = '<colspec colname="c {0!s}" colnum="{1!s}" colwidth="{2}"/>\n'
+COLSPEC_TAG = '<colspec colname="c{0!s}" colnum="{1!s}" colwidth="{2}"/>\n'
 
 
 class DITAContent(object):
