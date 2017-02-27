@@ -23,7 +23,24 @@ from dita_content import DITAContent
 # The column names (written as they are in the MIB file) that are to be
 # included.
 COLUMNS = ['SNMP NAME', 'OID', 'MAX-ACCESS', 'DESCRIPTION']
-COLUMN_WIDTHS = ["38%", "25%", "12%", "25%"]
+COLUMN_WIDTHS = ["40*", "29*", "11*", "20*"]
+
+# By default, column names are output in title caps. Use this dict to
+# override that e.g. for initialisms.
+COLUMN_OUTPUT_NAMES = {
+    'SNMP NAME': 'SNMP Name',
+    'OID': 'OID',
+}
+
+
+def get_column_name(column):
+    """
+    Get the display name to be output for the column.
+
+    Unless overridden in COLUMN_OUTPUT_NAMES, this will be the column name
+    in title caps.
+    """
+    return COLUMN_OUTPUT_NAMES.get(column, column.title())
 
 DEFAULT_OUTPUT_DIR = '.'
 
@@ -166,7 +183,7 @@ def write_dita_table(dictionary, table_oid, dita_content):
             table_oid:          The top level OID for the table
             dita_content:       A DITAContent object
     '''
-    heads = [word.title() for word in COLUMNS]
+    heads = [get_column_name(word) for word in COLUMNS]
     table_name = dictionary[table_oid].get_info('SNMP NAME')
 
     dita_content.begin_table(table_name, heads, COLUMN_WIDTHS)
