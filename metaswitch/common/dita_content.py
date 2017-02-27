@@ -53,11 +53,13 @@ class DITAContent(object):
         for index, column in enumerate(columns, start=1):
             self._xml += '<colspec colname="c' + str(index) + '" colnum="' + str(index) + '" colwidth="' + widths[index-1] + '"/>\n'
 
-        self._xml += '<tbody>\n'
+        self._xml += '<thead>\n'
         self._xml += '<row>\n'
         for column in columns:
             self._xml += '<entry>\n<p><b>' + column + '</b></p>\n</entry>\n'
         self._xml += '</row>\n'
+        self._xml += '</thead>\n'
+        self._xml += '<tbody>\n'
 
     def end_table(self):
         self._xml += '</tbody>\n'
