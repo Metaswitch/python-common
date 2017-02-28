@@ -222,6 +222,7 @@ def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no
     alarm_list = parse_alarms_file(json_file)
     write_constants_file(alarm_list, constants_file)
 
+
 # Read in alarm information from a list of alarms files and generate a CSV
 # document describing the alarms.   Returns CSV as a text string.
 def alarms_to_csv(alarms_files):
