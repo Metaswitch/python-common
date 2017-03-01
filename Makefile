@@ -43,8 +43,8 @@ coverage: $(ENV_DIR)/bin/coverage setup.py env
 env: ${ENV_DIR}/.eggs_installed
 
 $(ENV_DIR)/bin/python:
-	# Set up a fresh virtual environment
-	virtualenv --setuptools --no-download --python=$(PYTHON_BIN) $(ENV_DIR)
+	# Set up a fresh virtual environment.
+	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
 	$(ENV_DIR)/bin/easy_install "setuptools==24"
 	$(ENV_DIR)/bin/easy_install distribute
 	$(ENV_DIR)/bin/pip install cffi
