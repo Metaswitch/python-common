@@ -57,11 +57,21 @@ alarm_model_state = {"cleared": 1,
                      "minor": 4,
                      "warning": 3}
 
+
+def full_alarm_oid(oid_fragment):
+    """
+    Convert OID fragments used in the alarm model into full OIDs.
+    """
+    # Prepend the OID prefix used by the alarm model for Clearwater
+    # alarms.
+    return "1.3.6.1.2.1.118.1.1.2.1.3.0." + oid_fragment
+
 # Valid causes - this should be kept in sync with the
 # list in alarmdefinition.h in cpp-common
 valid_causes = ["software_error",
                 "database_inconsistency",
                 "underlying_resource_unavailable"]
+
 
 class Alarm(object):
     # Takes Alarm JSON, verifies it and either throws an exception or
@@ -73,7 +83,8 @@ class Alarm(object):
             self._levels = {}
 
             assert alarm['cause'].lower() in valid_causes, \
-                "Cause ({}) invalid in alarm {}".format(alarm['cause'], self._name)
+                "Cause ({}) invalid in alarm {}".format(alarm['cause'],
+                                                        self._name)
             self._cause = alarm['cause']
 
             found_cleared = False
@@ -91,13 +102,14 @@ class Alarm(object):
             # Check that there was a cleared severity level and at least one
             # non-cleared
             assert found_cleared, \
-                   "Alarm {} missing a cleared severity".format(self._name)
+                "Alarm {} missing a cleared severity".format(self._name)
             assert found_non_cleared, \
-                   "Alarm {} missing any non-cleared severities".format(self._name)
+                "Alarm {} missing any non-cleared severities".format(self._name)
 
         except KeyError as e:
             print "Invalid JSON format - missing mandatory value {}".format(e)
             raise
+
 
 class AlarmLevel(object):
     # Takes JSON representing a specific alarm level definition, verifies it
@@ -210,6 +222,7 @@ def validate_alarms_and_write_constants(json_file, constants_file): # pragma: no
     alarm_list = parse_alarms_file(json_file)
     write_constants_file(alarm_list, constants_file)
 
+
 # Read in alarm information from a list of alarms files and generate a CSV
 # document describing the alarms.   Returns CSV as a text string.
 def alarms_to_csv(alarms_files):
@@ -247,6 +260,7 @@ def alarms_to_csv(alarms_files):
 
     return output.getvalue()
 
+
 # Read in alarm information from a list of alarms files and generate a DITA
 # document describing the alarms.   Returns DITA as XML.
 def alarms_to_dita(alarms_files):
@@ -258,7 +272,7 @@ def alarms_to_dita(alarms_files):
 
         for alarm in alarm_list:
             for alarm_level in alarm._levels.itervalues():
-                fields = {"OID": alarm_level._oid,
+                fields = {"OID": full_alarm_oid(alarm_level._oid),
                           "ITU severity": alarm_level._itu_severity,
                           "Cause": alarm._cause,
                           "Severity": alarm_level._severity_string,
@@ -278,6 +292,7 @@ def alarms_to_dita(alarms_files):
     dita_content.end_section()
     return dita_content._xml
 
+
 # Read in alarm information from a list of alarms files and write a DITA
 # document describing them.
 def write_dita_file(alarms_files, dita_filename): #pragma: no cover
@@ -286,6 +301,7 @@ def write_dita_file(alarms_files, dita_filename): #pragma: no cover
     with open(dita_filename, "w") as dita_file:
         dita_file.write(xml)
 
+
 # Read in alarm information from a list of alarms files and write a CSV
 # document describing them.
 def write_csv_file(alarms_files, csv_filename): #pragma: no cover
@@ -293,4 +309,3 @@ def write_csv_file(alarms_files, csv_filename): #pragma: no cover
 
     with open(csv_filename, "w") as csv_file:
         csv_file.write(output)
-
