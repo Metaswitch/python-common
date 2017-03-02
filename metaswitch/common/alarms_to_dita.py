@@ -44,4 +44,3 @@ args = parser.parse_args()
 dita_filename = os.path.join('.', args.output_dir, 'alarms.xml')
 
 write_dita_file(args.alarms_files, dita_filename)
-
