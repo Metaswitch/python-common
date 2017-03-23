@@ -19,6 +19,8 @@ import os
 import sys
 import json
 from dita_content import DITAContent
+import StringIO
+import csv
 
 # The column names (written as they are in the MIB file) that are to be
 # included.
@@ -41,6 +43,7 @@ def get_column_name(column):
     in title caps.
     """
     return COLUMN_OUTPUT_NAMES.get(column, column.title())
+
 
 DEFAULT_OUTPUT_DIR = '.'
 
@@ -166,6 +169,25 @@ def get_oids_at_depth(oid_list, depth):
     return filter(lambda oid: len(oid.split('.')) == depth, oid_list)
 
 
+def get_data_from_stat(stat):
+    ''' Gets the data from a stat. If the stat is an intermediate node or
+        blacklisted, returns None.
+
+        Input
+        stat:               Statistic object to be processed
+    '''
+    data = None
+
+    # If MAX-ACCESS is N/A, this is an intermediate node of no interest, and
+    # we skip it.
+    if not stat.get_info('MAX-ACCESS') == "N/A":
+        stat_name = stat.get_info('SNMP NAME')
+        if should_output_stat(stat_name):
+            data = [stat.get_info(detail) for detail in COLUMNS]
+
+    return data
+
+
 def write_dita_file(dita_filename, dita_title, table_oids, stats):
     logger.debug('Generating DITA file %s', dita_filename)
 
@@ -200,20 +222,34 @@ def write_dita_table(dictionary, table_oid, dita_content):
         stat = dictionary[oid]
         if (oid.startswith(table_oid + '.') or (oid == table_oid)):
             # Here we are certain that an element belongs in our table
-            if stat.get_info('DESCRIPTION') == "N/A":
-                # This is some kind of intermediate node that isn't of
-                # interest.  Skip it.
-                continue
+            data = get_data_from_stat(stat)
 
-            stat_name = stat.get_info('SNMP NAME')
-            if not should_output_stat(stat_name):
-                continue
-
-            data = [stat.get_info(detail) for detail in COLUMNS]
-
-            dita_content.add_table_entry(data)
+            if data is not None:
+                dita_content.add_table_entry(data)
 
     dita_content.end_table()
+
+
+def write_csv_file(csv_filename, table_oids, stats):
+    logger.debug('Generating CSV file %s', csv_filename)
+
+    output = StringIO.StringIO()
+    writer = csv.writer(output, lineterminator='\n')
+
+    writer.writerow(COLUMNS)
+
+    sorted_table_oids = sorted(table_oids)
+    for table_oid in sorted_table_oids:
+        for oid in sorted(stats):
+            stat = stats[oid]
+            if (oid.startswith(table_oid + '.') or (oid == table_oid)):
+                data = get_data_from_stat(stat)
+
+                if data is not None:
+                    writer.writerow(data)
+
+    with open(csv_filename, "w") as csv_file:
+        csv_file.write(output.getvalue())
 
 
 def should_output_stat(stat_name):
@@ -232,6 +268,7 @@ def should_output_stat(stat_name):
     if (white_list is not None):
         return (stat_name in white_list)
     return (stat_name not in black_list)
+
 
 if __name__ == '__main__':
     # Do some arg parsing
@@ -260,6 +297,11 @@ if __name__ == '__main__':
              ' arrays of top level objects to ignore (ignore_list),'
              ' individual stats to whitelist (whitelist) and stats'
              ' to blacklist (blacklist).')
+    parser.add_argument(
+        '--output-csv',
+        action='store_true',
+        help='An optional flag. If set, the script will output a CSV file'
+             ' instead of a DITA file.')
     args = vars(parser.parse_args())
 
     if args['output_dir']:
@@ -307,7 +349,12 @@ if __name__ == '__main__':
 
     for file_oid, table_oids in file_and_table_oids.iteritems():
         file_oid_name = stats[file_oid].get_info('SNMP NAME')
-        write_dita_file(output_name + '_' + file_oid_name + '.xml',
-                        file_oid_name,
-                        table_oids,
-                        stats)
+        if args['output_csv']:
+            write_csv_file(output_name + '_' + file_oid_name + '.csv',
+                           table_oids,
+                           stats)
+        else:
+            write_dita_file(output_name + '_' + file_oid_name + '.xml',
+                            file_oid_name,
+                            table_oids,
+                            stats)
