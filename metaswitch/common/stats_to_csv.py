@@ -45,7 +45,7 @@ def write_csv_file(csv_filename, table_oids, stats):
         for oid in sorted(stats):
             stat = stats[oid]
             if (oid.startswith(table_oid + '.') or (oid == table_oid)):
-                if stat.get_info('DESCRIPTION') == "N/A":
+                if stat.get_info('MAX-ACCESS') == "N/A":
                     # This is some kind of intermediate node that isn't of
                     # interest.  Skip it.
                     continue
@@ -136,6 +136,6 @@ if __name__ == '__main__':
 
     for file_oid, table_oids in file_and_table_oids.iteritems():
         file_oid_name = stats[file_oid].get_info('SNMP NAME')
-        write_csv_file(output_name + '_' + file_oid_name + '.xml',
+        write_csv_file(output_name + '_' + file_oid_name + '.csv',
                        table_oids,
                        stats)
