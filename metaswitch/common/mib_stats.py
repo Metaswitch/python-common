@@ -2,9 +2,25 @@ import argparse
 import logging
 import csv
 import StringIO
+import collections
 import mib
 
 logger = logging.getLogger(__name__)
+
+MibData = collections.namedtuple("MibData", ["source_file",
+                                             "mib_table_description",
+                                             "oid",
+                                             "mib_field_description"])
+CsvData = collections.namedtuple("CsvData", ["version_introduced",
+                                             "calculation_type",
+                                             "reset_trigger",
+                                             "reset_trigger_detail",
+                                             "data_type",
+                                             "index_fields",
+                                             "index_field_values",
+                                             "field_size",
+                                             "field_units",
+                                             "aggregation_mechanism"])
 
 
 def main():
@@ -21,7 +37,7 @@ def main():
 
 def setup_logging():
     """Set up basic logging."""
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig()
 
 
 def parse_args():
@@ -61,7 +77,7 @@ def parse_mib_file(path):
 
     `path` should be the absolute path to an ASN.1 MIB file on disk.
     Returns a dict keyed by (MIB table name, MIB field name) with values
-    (Source File, MIB table description, OID, MIB field description).
+    MibData entries.
     """
     mib_file = mib.MibFile(path)
     all_oids = mib_file.oids
@@ -86,10 +102,12 @@ def parse_mib_file(path):
                 stat.get_info("SNMP NAME"))
 
     def value(stat):
-        return (stat.get_info("SOURCE FILE"),
-                stat.parent().get_info("DESCRIPTION"),
-                stat.get_info("DESCRIPTION"),
-                stat.get_info("OID"))
+        return MibData(
+            stat.get_info("SOURCE FILE"),
+            stat.parent().get_info("DESCRIPTION"),
+            stat.get_info("DESCRIPTION"),
+            stat.get_info("OID"),
+        )
 
     mib_dict = {key(stat): value(stat) for stat in leaf_stats}
 
@@ -102,11 +120,34 @@ def parse_csv_file(csv_file):
 
     `csv_file` should be an absolute path to a CSV file on disc.
     Returns an OrderedDict keyed by (MIB table name, MIB field name) with
-    values (version introduced,	calculation type, reset trigger,
-    reset trigger detail, data type, index fields, index field values,
-    field size, field units, aggregation mechanism).
+    values CsvData entries.
     """
-    pass
+    with open(csv_file, 'rb') as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows = list(reader)
+
+    def key(row):
+        return (row['MIB table name'], row['MIB field name'])
+
+    def value(row):
+        return CsvData(
+            row["version introduced"],
+            row["calculation type"],
+            row["reset trigger"],
+            row["reset trigger detail"],
+            row["data type"],
+            row["index fields"],
+            row["index field values"],
+            row["field size"],
+            row["field units"],
+            row["aggregation mechanism"],
+        )
+
+    parsed_file = collections.OrderedDict((key(row), value(row))
+                                          for row in rows)
+    logger.debug("Parsed CSV file: %s", parsed_file)
+
+    return parsed_file
 
 
 def merge_csv_with_mibs(parsed_csv, parsed_mibs):
@@ -114,15 +155,44 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
 
     Merge dicts on key (MIB table name, MIB field name), keeping order of input
     CSV file.
-    Returns OrderedDict with complete information.
+    Returns list with complete information.
     """
-    return parsed_mibs
+    merged_data = []
+
+    for key, csv_data in parsed_csv.items():
+        try:
+            mib_data = parsed_mibs.pop(key)
+            merged_data.append((
+                csv_data.version_introduced,
+                key[0],  # MIB Table Name
+                mib_data.source_file,
+                mib_data.mib_table_description,
+                mib_data.oid,
+                key[1],  # MIB Field Name
+                mib_data.mib_field_description,
+                csv_data.calculation_type,
+                csv_data.reset_trigger,
+                csv_data.reset_trigger_detail,
+                csv_data.data_type,
+                csv_data.index_fields,
+                csv_data.index_field_values,
+                csv_data.field_size,
+                csv_data.field_units,
+                csv_data.aggregation_mechanism,
+            ))
+        except KeyError:
+            logger.error("Missing MIB value for key %s", key)
+
+    for key in parsed_mibs:
+        logger.error("Missing CSV value for key %s", key)
+
+    return merged_data
 
 
 def write_csv(merged_entries, output_file):
     """Output CSV file to disk.
 
-    `merged_entries` should be an ordered mapping.
+    `merged_entries` should be a list of data tuples.
     `output_file` should be the path to the output csv.
     """
     logger.info('Generating CSV file %s', output_file)
@@ -131,15 +201,27 @@ def write_csv(merged_entries, output_file):
     writer = csv.writer(output, lineterminator='\n')
 
     column_headers = [
-        "Source file",
+        "Version Introduced",
+        "MIB Table Name",
+        "Source File",
         "MIB Table Description",
         "OID",
+        "MIB Field Name",
         "MIB Field Description",
+        "Calculation Type",
+        "Reset Trigger",
+        "Reset Trigger Detail",
+        "Data Type",
+        "Index Fields",
+        "Index Field Values",
+        "Field Size",
+        "Field Units",
+        "Aggregation Mechanism",
     ]
 
     writer.writerow(column_headers)
 
-    for entry in merged_entries.values():
+    for entry in merged_entries:
         writer.writerow(entry)
 
     with open(output_file, "w") as csv_file:
