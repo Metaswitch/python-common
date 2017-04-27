@@ -17,8 +17,6 @@ import argparse
 import os
 import sys
 import json
-import StringIO
-import csv
 import mib
 from dita_content import DITAContent
 
@@ -98,28 +96,6 @@ def write_dita_table(dictionary, table_oid, dita_content):
     dita_content.end_table()
 
 
-def write_csv_file(csv_filename, table_oids, stats):
-    logger.debug('Generating CSV file %s', csv_filename)
-
-    output = StringIO.StringIO()
-    writer = csv.writer(output, lineterminator='\n')
-
-    writer.writerow(COLUMNS)
-
-    sorted_table_oids = sorted(table_oids)
-    for table_oid in sorted_table_oids:
-        for oid in sorted(stats):
-            stat = stats[oid]
-            if (oid.startswith(table_oid + '.') or (oid == table_oid)):
-                data = stat.get_data(COLUMNS)
-
-                if data is not None:
-                    writer.writerow(data)
-
-    with open(csv_filename, "w") as csv_file:
-        csv_file.write(output.getvalue())
-
-
 def should_output_stat(stat_name):
     if (white_list is None) and (black_list is None):
         return True
@@ -165,11 +141,6 @@ if __name__ == '__main__':
              ' arrays of top level objects to ignore (ignore_list),'
              ' individual stats to whitelist (whitelist) and stats'
              ' to blacklist (blacklist).')
-    parser.add_argument(
-        '--output-csv',
-        action='store_true',
-        help='An optional flag. If set, the script will output a CSV file'
-             ' instead of a DITA file.')
     args = vars(parser.parse_args())
 
     if args['output_dir']:
@@ -215,12 +186,8 @@ if __name__ == '__main__':
 
     for file_oid, table_oids in file_and_table_oids.iteritems():
         file_oid_name = stats[file_oid].get_info('SNMP NAME')
-        if args['output_csv']:
-            write_csv_file(output_name + '_' + file_oid_name + '.csv',
-                           table_oids,
-                           stats)
-        else:
-            write_dita_file(output_name + '_' + file_oid_name + '.xml',
-                            file_oid_name,
-                            table_oids,
-                            stats)
+
+        write_dita_file(output_name + '_' + file_oid_name + '.xml',
+                        file_oid_name,
+                        table_oids,
+                        stats)

@@ -1,5 +1,7 @@
 import argparse
 import logging
+import csv
+import StringIO
 import mib
 
 logger = logging.getLogger(__name__)
@@ -114,7 +116,7 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
     CSV file.
     Returns OrderedDict with complete information.
     """
-    pass
+    return parsed_mibs
 
 
 def write_csv(merged_entries, output_file):
@@ -123,7 +125,25 @@ def write_csv(merged_entries, output_file):
     `merged_entries` should be an ordered mapping.
     `output_file` should be the path to the output csv.
     """
-    pass
+    logger.info('Generating CSV file %s', output_file)
+
+    output = StringIO.StringIO()
+    writer = csv.writer(output, lineterminator='\n')
+
+    column_headers = [
+        "Source file",
+        "MIB Table Description",
+        "OID",
+        "MIB Field Description",
+    ]
+
+    writer.writerow(column_headers)
+
+    for entry in merged_entries.values():
+        writer.writerow(entry)
+
+    with open(output_file, "w") as csv_file:
+        csv_file.write(output.getvalue())
 
 
 if __name__ == "__main__":
