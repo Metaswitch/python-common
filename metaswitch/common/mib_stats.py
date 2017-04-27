@@ -1,5 +1,6 @@
 import argparse
 import logging
+import mib
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,52 @@ def parse_mib_files(mib_files):
     Returns a dict keyed by (MIB table name, MIB field name) with values
     (Source File, MIB table description, OID, MIB field description).
     """
-    pass
+    output = {}
+    for mib_file in mib_files:
+        output.update(parse_mib_file(mib_file))
+    logging.debug("Parsed MIBs: %s", output)
+    return output
+
+
+def parse_mib_file(path):
+    """Parse the specified MIB file.
+
+    `path` should be the absolute path to an ASN.1 MIB file on disk.
+    Returns a dict keyed by (MIB table name, MIB field name) with values
+    (Source File, MIB table description, OID, MIB field description).
+    """
+    mib_file = mib.MibFile(path)
+    all_oids = mib_file.oids
+
+    def stat_test(stat):
+        """Filter for leaf nodes in OID tree."""
+        oid = stat.get_info("OID")
+        depth = len(oid.split('.'))
+        # TODO: validate this assumption!
+        # TODO: pick the right nodes!
+        if depth <= 3:
+            return False
+        return True
+
+    columns = ["SNMP NAME", "SOURCE FILE", "DESCRIPTION", "OID", ]
+    stats = mib_file.get_all_stats(columns).values()
+
+    leaf_stats = [stat for stat in stats if stat_test(stat)]
+
+    def key(stat):
+        return (stat.parent().get_info("SNMP NAME"),
+                stat.get_info("SNMP NAME"))
+
+    def value(stat):
+        return (stat.get_info("SOURCE FILE"),
+                stat.parent().get_info("DESCRIPTION"),
+                stat.get_info("DESCRIPTION"),
+                stat.get_info("OID"))
+
+    mib_dict = {key(stat): value(stat) for stat in leaf_stats}
+
+    logger.debug("Parsed MIB file, found stats %s", mib_dict)
+    return mib_dict
 
 
 def parse_csv_file(csv_file):
