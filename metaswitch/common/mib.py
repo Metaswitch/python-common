@@ -38,6 +38,8 @@ class MibFile(object):
         `columns` should be a list of the properties of the statistic that we
         want to parse.
         """
+        # Add INDEX to the list of fields to retrieve and parse - we
+        # need this in order to check whether a node is a statistic or not.
         columns.append("INDEX")
         stats = {oid: Statistic(oid, self.path, columns) for
                  oid in self.oids}
