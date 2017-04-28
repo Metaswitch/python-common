@@ -1,3 +1,28 @@
+"""Generate detailed statistics documentation.
+
+This script takes a number of MIB files and merges them with a CSV file
+containing additional data, to create an output CSV file suitable for
+sharing with RFP central and SAs.
+
+This is not intended to create a document suitable for sharing directly
+with customers, but it should make it simple for our customer-facing
+teams to make such documents.
+
+An error-level log is output for each:
+* Item in the MIB files that doesn't have corresponding extra CSV data.
+* Item in the CSV file that can't be found in the MIB files.
+
+To set the logging level, set the LOGGING_LEVEL environemnt variable
+to the name of a standard Python logging level e.g. DEBUG.
+"""
+# To add new fields to the output CSV:
+# * Determine where the field comes from and add it to either
+#   MibData or CsvData.
+# * Enhance `parse_csv_file` or `parse_mib_file` to read the new field.
+# * Enhance `merge_csv_with_mibs` to merge the value to the right place
+#   in the output CSV.
+# * Enhance `write_csv` to output the new field.
+import os
 import argparse
 import logging
 import csv
@@ -37,14 +62,13 @@ def main():
 
 def setup_logging():
     """Set up basic logging."""
-    logging.basicConfig()
+    level = os.getenv('LOG_LEVEL', 'WARNING')
+    logging.basicConfig(level=getattr(logging, level))
 
 
 def parse_args():
     """Get the command-line arguments."""
-    parser = argparse.ArgumentParser(
-        description='Generate detailed statistics documentation to be used '
-                    'for RFP responses and other customer engagements.')
+    parser = argparse.ArgumentParser( description=__doc__)
     parser.add_argument('mib_files', metavar='MIB', nargs='+',
                         help='The absolute path(s) of the input MIB(s).')
     parser.add_argument('csv_file', metavar='CSV',
