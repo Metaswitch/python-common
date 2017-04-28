@@ -181,10 +181,7 @@ class Statistic(object):
                     ancestor_index_fields = \
                           [x.strip() for x in ancestor_index_string.split(',')]
                     if field_name in ancestor_index_fields:
-                        print True
                         return True
-                    else:
-                        print False
         return False
 
 
@@ -234,6 +231,7 @@ def _get_tokenized_mib_details(mib_file, oid):
     with open('/dev/null', 'w') as the_bin:
         detail_string = subprocess.check_output(get_details_cmd,
                                                 stderr=the_bin)
+    print get_details_cmd
 
     in_quotes = False
     in_braces = False

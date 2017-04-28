@@ -165,6 +165,10 @@ def parse_mib_file(path):
             logger.debug("Stat %s is not in a table - ignoring", stat)
             return False
 
+        if stat.get_info("SNMP NAME").endswith("Entry"):
+            logger.debug("Stat %s is Entry - ignoring", stat)
+            return False
+
         if stat.is_index_field():
             logger.debug("Stat %s is an index - ignoring", stat)
             return False
