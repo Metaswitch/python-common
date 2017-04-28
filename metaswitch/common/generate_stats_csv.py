@@ -19,9 +19,9 @@ to the name of a standard Python logging level e.g. DEBUG.
 # * Determine where the field comes from and add it to either
 #   MibData or CsvData.
 # * Enhance `parse_csv_file` or `parse_mib_file` to read the new field.
-# * Enhance `merge_csv_with_mibs` to merge the value to the right place
+# * Enhance `merge_entry` to merge the value to the right place
 #   in the output CSV.
-# * Enhance `write_csv` to output the new field.
+# * Enhance `COLUMN_HEADERS` to output the new field.
 import os
 import argparse
 import logging
@@ -32,10 +32,54 @@ import mib
 
 logger = logging.getLogger(__name__)
 
+COLUMN_HEADERS = [
+    "Version Introduced",
+    "MIB Table Name",
+    "MIB Field Name",
+    "Source File",
+    "MIB Table Description",
+    "OID",
+    "MIB Field Description",
+    "Calculation Type",
+    "Reset Trigger",
+    "Reset Trigger Detail",
+    "Data Type",
+    "Index Fields",
+    "Index Field Values",
+    "Field Size",
+    "Field Units",
+    "Aggregation Mechanism",
+]
+
+
+def merge_entry(key, mib_data, csv_data):
+    """Create a tuple in the order specified by COLUMN_HEADERS.
+
+    Inputs are KeyData, MibData and CsvData respectively.
+    """
+    return (
+        csv_data.version_introduced,
+        key.mib_table_name,
+        key.mib_field_name,
+        mib_data.source_file,
+        mib_data.mib_table_description,
+        mib_data.oid,
+        mib_data.mib_field_description,
+        csv_data.calculation_type,
+        csv_data.reset_trigger,
+        csv_data.reset_trigger_detail,
+        csv_data.data_type,
+        csv_data.index_fields,
+        csv_data.index_field_values,
+        csv_data.field_size,
+        csv_data.field_units,
+        csv_data.aggregation_mechanism,
+    )
+
 MibData = collections.namedtuple("MibData", ["source_file",
                                              "mib_table_description",
-                                             "oid",
-                                             "mib_field_description"])
+                                             "mib_field_description",
+                                             "oid"])
 CsvData = collections.namedtuple("CsvData", ["version_introduced",
                                              "calculation_type",
                                              "reset_trigger",
@@ -46,6 +90,8 @@ CsvData = collections.namedtuple("CsvData", ["version_introduced",
                                              "field_size",
                                              "field_units",
                                              "aggregation_mechanism"])
+KeyData = collections.namedtuple("KeyData", ["mib_table_name",
+                                             "mib_field_name"])
 
 
 def main():
@@ -121,15 +167,15 @@ def parse_mib_file(path):
     leaf_stats = [stat for stat in stats if stat_test(stat)]
 
     def key(stat):
-        return (stat.table().get_info("SNMP NAME"),
-                stat.get_info("SNMP NAME"))
+        return KeyData(mib_table_name=stat.table().get_info("SNMP NAME"),
+                       mib_field_name=stat.get_info("SNMP NAME"))
 
     def value(stat):
         return MibData(
-            stat.get_info("SOURCE FILE"),
-            stat.table().get_info("DESCRIPTION"),
-            stat.get_info("DESCRIPTION"),
-            stat.get_info("OID"),
+            source_file=stat.get_info("SOURCE FILE"),
+            mib_table_description=stat.table().get_info("DESCRIPTION"),
+            mib_field_description=stat.get_info("DESCRIPTION"),
+            oid=stat.get_info("OID"),
         )
 
     mib_dict = {key(stat): value(stat) for stat in leaf_stats}
@@ -150,20 +196,21 @@ def parse_csv_file(csv_file):
         rows = list(reader)
 
     def key(row):
-        return (row['MIB table name'], row['MIB field name'])
+        return KeyData(mib_table_name=row['MIB table name'],
+                       mib_field_name=row['MIB field name'])
 
     def value(row):
         return CsvData(
-            row["version introduced"],
-            row["calculation type"],
-            row["reset trigger"],
-            row["reset trigger detail"],
-            row["data type"],
-            row["index fields"],
-            row["index field values"],
-            row["field size"],
-            row["field units"],
-            row["aggregation mechanism"],
+            version_introduced=row["version introduced"],
+            calculation_type=row["calculation type"],
+            reset_trigger=row["reset trigger"],
+            reset_trigger_detail=row["reset trigger detail"],
+            data_type=row["data type"],
+            index_fields=row["index fields"],
+            index_field_values=row["index field values"],
+            field_size=row["field size"],
+            field_units=row["field units"],
+            aggregation_mechanism=row["aggregation mechanism"],
         )
 
     parsed_file = collections.OrderedDict((key(row), value(row))
@@ -185,24 +232,7 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
     for key, csv_data in parsed_csv.items():
         try:
             mib_data = parsed_mibs.pop(key)
-            merged_data.append((
-                csv_data.version_introduced,
-                key[0],  # MIB Table Name
-                mib_data.source_file,
-                mib_data.mib_table_description,
-                mib_data.oid,
-                key[1],  # MIB Field Name
-                mib_data.mib_field_description,
-                csv_data.calculation_type,
-                csv_data.reset_trigger,
-                csv_data.reset_trigger_detail,
-                csv_data.data_type,
-                csv_data.index_fields,
-                csv_data.index_field_values,
-                csv_data.field_size,
-                csv_data.field_units,
-                csv_data.aggregation_mechanism,
-            ))
+            merged_data.append(merge_entry(key, mib_data, csv_data))
         except KeyError:
             logger.error("Missing MIB value for key %s", key)
 
@@ -223,26 +253,7 @@ def write_csv(merged_entries, output_file):
     output = StringIO.StringIO()
     writer = csv.writer(output, lineterminator='\n')
 
-    column_headers = [
-        "Version Introduced",
-        "MIB Table Name",
-        "Source File",
-        "MIB Table Description",
-        "OID",
-        "MIB Field Name",
-        "MIB Field Description",
-        "Calculation Type",
-        "Reset Trigger",
-        "Reset Trigger Detail",
-        "Data Type",
-        "Index Fields",
-        "Index Field Values",
-        "Field Size",
-        "Field Units",
-        "Aggregation Mechanism",
-    ]
-
-    writer.writerow(column_headers)
+    writer.writerow(COLUMN_HEADERS)
 
     for entry in merged_entries:
         writer.writerow(entry)
