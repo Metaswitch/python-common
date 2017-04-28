@@ -68,14 +68,14 @@ def setup_logging():
 
 def parse_args():
     """Get the command-line arguments."""
-    parser = argparse.ArgumentParser( description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mib_files', metavar='MIB', nargs='+',
                         help='The absolute path(s) of the input MIB(s).')
     parser.add_argument('csv_file', metavar='CSV',
                         help='The absolute path of the input CSV.')
     parser.add_argument('--output-file', default='./output.csv',
-                        help='Optional output file name (defaults to output.csv'
-                        ' in the current directory).')
+                        help='Optional output file name (defaults to '
+                        'output.csv in the current directory).')
     args = vars(parser.parse_args())
     logger.debug("Command-line arguments: %s", args)
     return args
@@ -104,7 +104,6 @@ def parse_mib_file(path):
     MibData entries.
     """
     mib_file = mib.MibFile(path)
-    all_oids = mib_file.oids
 
     def stat_test(stat):
         """Filter for leaf nodes in OID tree."""
