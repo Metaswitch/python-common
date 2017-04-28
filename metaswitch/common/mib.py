@@ -40,7 +40,9 @@ class MibFile(object):
         """
         # Add INDEX to the list of fields to retrieve and parse - we
         # need this in order to check whether a node is a statistic or not.
-        columns.append("INDEX")
+        if not "INDEX" in columns:
+            columns.append("INDEX")
+
         stats = {oid: Statistic(oid, self.path, columns) for
                  oid in self.oids}
         return stats
@@ -62,9 +64,6 @@ class MibFile(object):
 class Statistic(object):
     ''' The class structure for each OID and its relevant information
     '''
-    def __repr__(self):
-        return self.details['SNMP NAME']
-
     def __init__(self, oid, mib_file, columns):
         '''
         Input
@@ -105,7 +104,7 @@ class Statistic(object):
         self.details['OID'] = oid.strip()
 
         logger.debug('generated object of class statistic with OID %s and'
-                     ' details %s' % (oid, self.details))
+                     ' details %s', oid, self.details)
 
     def get_info(self, name):
         if name in self.details:
@@ -170,10 +169,10 @@ class Statistic(object):
         field_name = self.get_info("SNMP NAME")
 
         # Check that we're inside a table.
-        self.table()
+        table = self.table()
 
         for ancestor in self.ancestors():
-            logging.debug("Looking at Ancestor: %s" %
+            logging.debug("Looking at Ancestor: %s",
                           ancestor.get_info("SNMP NAME"))
             ancestor_index_string = ancestor.get_info("INDEX")
             if ancestor_index_string:
@@ -182,17 +181,22 @@ class Statistic(object):
                 # parse then split it into separate elements and look for a
                 # match with the field name.
                 ancestor_index_string = ancestor_index_string[2:-2]
-                logger.debug("Checking if %s is in %s" %
-                                           (field_name, ancestor_index_string))
+                logger.debug("Checking if %s is in %s",
+                             field_name,
+                             ancestor_index_string)
 
                 if ancestor_index_string:
-                    ancestor_index_fields = \
-                          [x.strip() for x in ancestor_index_string.split(',')]
+                    ancestor_index_fields = [x.strip()
+                                     for x in ancestor_index_string.split(',')]
                     if field_name in ancestor_index_fields:
-                        logger.debug("%s is an index field" % field_name)
+                        logger.debug("%s is an index field", field_name)
                         return True
 
-        logger.debug("%s is not an index field" % field_name)
+            if table.oid == ancestor.oid:
+                break
+
+        logger.debug("%s is not an index field", field_name)
+
         return False
 
 
@@ -213,6 +217,10 @@ class Statistic(object):
                 data = [stat.get_info(detail) for detail in columns]
 
         return data
+
+
+    def __str__(self):
+        return self.details['SNMP NAME']
 
 
 class memoize(collections.defaultdict):
