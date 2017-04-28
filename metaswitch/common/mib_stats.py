@@ -49,6 +49,7 @@ CsvData = collections.namedtuple("CsvData", ["version_introduced",
 
 
 def main():
+    """Main entry point for the script."""
     setup_logging()
     args = parse_args()
 
