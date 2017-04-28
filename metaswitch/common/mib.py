@@ -38,6 +38,7 @@ class MibFile(object):
         `columns` should be a list of the properties of the statistic that we
         want to parse.
         """
+        columns.append("INDEX")
         stats = {oid: Statistic(oid, self.path, columns) for
                  oid in self.oids}
         return stats
@@ -59,6 +60,8 @@ class MibFile(object):
 class Statistic(object):
     ''' The class structure for each OID and its relevant information
     '''
+    def __repr__(self):
+        return self.details['SNMP NAME']
 
     def __init__(self, oid, mib_file, columns):
         '''
@@ -76,6 +79,7 @@ class Statistic(object):
         self.mib_file = mib_file
         self.columns = columns
         self.details = {}
+        self.oid = oid
 
         tokenized_details = _get_tokenized_mib_details(mib_file, oid)
 
@@ -105,8 +109,8 @@ class Statistic(object):
         if name in self.details:
             return self.details[name]
         else:
-            return False
             logger.warning('could not find a %s for OID %s', name, self.oid)
+            return False
 
     def parent(self):
         """Get the parent statistic.
@@ -153,6 +157,36 @@ class Statistic(object):
             self._table = ancestor
 
         return self._table
+
+
+    def is_index_field (self):
+        """Determine if this is an index field or not by stepping back through
+        the ancestors inside the table.
+
+        Raises `LookupError` if the statistic is not in a table."""
+
+        field_name = self.get_info("SNMP NAME")
+        self.table()
+
+        for ancestor in self.ancestors():
+            ancestor_index_string = ancestor.get_info("INDEX")
+            if ancestor_index_string:
+                # String should be of form { comma separated indices } or
+                # blank if no indices. Check that there's an acutal string to
+                # parse then split it into separate elements and look for a
+                # match with the field name.
+                ancestor_index_string = ancestor_index_string[2:-2]
+
+                if len(ancestor_index_string) > 0:
+                    ancestor_index_fields = \
+                          [x.strip() for x in ancestor_index_string.split(',')]
+                    if field_name in ancestor_index_fields:
+                        print True
+                        return True
+                    else:
+                        print False
+        return False
+
 
     def get_data(self, columns):
         ''' Gets the data from a stat. If the stat is an intermediate node or

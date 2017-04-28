@@ -109,10 +109,20 @@ def parse_mib_file(path):
     def stat_test(stat):
         """Filter for leaf nodes in OID tree."""
         # TODO: pick the right nodes!
+
+        # We throw away any fields that
+        # - aren't in a table
+        # - are index fields.
         try:
             stat.table()
         except LookupError:
+            logger.debug("Stat %s is not in a table - ignoring", stat)
             return False
+
+        if stat.is_index_field():
+            logger.debug("Stat %s is an index - ignoring", stat)
+            return False
+
         return True
 
     columns = ["SNMP NAME", "SOURCE FILE", "DESCRIPTION", "OID", ]
