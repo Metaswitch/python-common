@@ -153,8 +153,8 @@ def parse_mib_file(path):
     mib_file = mib.MibFile(path)
 
     def stat_test(stat):
-        """Filter for leaf nodes in OID tree."""
-        # TODO: pick the right nodes!
+        """Filter for statistics nodes - they're the leaf nodes in a table
+        which aren't indices."""
 
         # We throw away any fields that
         # - aren't in a table
