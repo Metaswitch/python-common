@@ -153,12 +153,33 @@ def parse_mib_file(path):
     mib_file = mib.MibFile(path)
 
     def stat_test(stat):
-        """Filter for leaf nodes in OID tree."""
-        # TODO: pick the right nodes!
+        """Filter to determine if this is a statistic nodes
+
+        That's determined by them being leaf nodes, inside a table and not
+        indices."""
+
+        # We throw away any fields that
+        # - aren't in a table
+        # - aren't leaves
+        # - are index fields.
         try:
             stat.table()
         except LookupError:
+            logger.debug("Stat %s is not in a table - ignoring", stat)
             return False
+
+        # We should just throw away non-leaf nodes but there's no easy way of
+        # determining that with the current architecture. Instead we check
+        # whether the field finished *Entry which is the only current case of
+        # non-leaf MIB fields that aren't indices.
+        if stat.get_info("SNMP NAME").endswith("Entry"):
+            logger.debug("Stat %s is Entry - ignoring", stat)
+            return False
+
+        if stat.is_index_field():
+            logger.debug("Stat %s is an index - ignoring", stat)
+            return False
+
         return True
 
     columns = ["SNMP NAME", "SOURCE FILE", "DESCRIPTION", "OID", ]
