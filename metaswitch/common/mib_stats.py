@@ -108,11 +108,10 @@ def parse_mib_file(path):
 
     def stat_test(stat):
         """Filter for leaf nodes in OID tree."""
-        oid = stat.get_info("OID")
-        depth = len(oid.split('.'))
-        # TODO: validate this assumption!
         # TODO: pick the right nodes!
-        if depth <= 3:
+        try:
+            stat.table()
+        except LookupError:
             return False
         return True
 
@@ -122,13 +121,13 @@ def parse_mib_file(path):
     leaf_stats = [stat for stat in stats if stat_test(stat)]
 
     def key(stat):
-        return (stat.parent().get_info("SNMP NAME"),
+        return (stat.table().get_info("SNMP NAME"),
                 stat.get_info("SNMP NAME"))
 
     def value(stat):
         return MibData(
             stat.get_info("SOURCE FILE"),
-            stat.parent().get_info("DESCRIPTION"),
+            stat.table().get_info("DESCRIPTION"),
             stat.get_info("DESCRIPTION"),
             stat.get_info("OID"),
         )

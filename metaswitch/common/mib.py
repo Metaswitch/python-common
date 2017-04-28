@@ -1,4 +1,5 @@
 import logging
+import collections
 import subprocess
 
 logger = logging.getLogger(__name__)
@@ -68,12 +69,15 @@ class Statistic(object):
         '''
         logger.info('Generating an element of class Statistic for OID: %s',
                     oid)
+        # Cache parent and table values.
+        self._table = None
+        self._parent = None
 
         self.mib_file = mib_file
         self.columns = columns
         self.details = {}
 
-        tokenized_details = self._get_tokenized_mib_details(mib_file, oid)
+        tokenized_details = _get_tokenized_mib_details(mib_file, oid)
 
         for item in columns:
             try:
@@ -105,45 +109,50 @@ class Statistic(object):
             logger.warning('could not find a %s for OID %s', name, self.oid)
 
     def parent(self):
-        """Return the parent statistic."""
-        parent_oid = self.details['OID'].rsplit('.', 1)[0]
-        return Statistic(parent_oid, self.mib_file, self.columns)
+        """Get the parent statistic.
 
-    def _get_tokenized_mib_details(self, mib_file, oid):
-        ''' Gets the details for a statistics from a MIB file.   Splits them by
-            whitespace and then regroups anything that is inside {} or "" in
-            keeping with ASN1 syntax.
+        Raises `LookupError` if no parent can be found."""
+        if not self._parent:
+            oid = self.details['OID']
+            logger.debug("Getting parent of OID %s", oid)
+            parent_oid = oid.rsplit('.', 1)[0]
+            if oid == parent_oid:
+                raise LookupError("At root of OID tree.")
+            self._parent = Statistic(parent_oid, self.mib_file, self.columns)
+        return self._parent
 
-            Input
-            mib_file:           The MIB file defining the statistic
-            oid:                The OID of the statistic we are interested in
-            Return:             A list of tokens, where a token is either a
-                                single word or all words enclosed within {} or
-                                "".
-        '''
-        get_details_cmd = ['snmptranslate', '-m', mib_file, '-Td', oid]
-        with open('/dev/null', 'w') as the_bin:
-            detail_string = subprocess.check_output(get_details_cmd,
-                                                    stderr=the_bin)
+    def ancestors(self):
+        """Get an iterator of ancestor nodes for this Statistic."""
+        ancestor = self
+        while True:
+            try:
+                ancestor = ancestor.parent()
+                yield ancestor
+            except LookupError:
+                break
 
-        in_quotes = False
-        in_braces = False
-        output = []
-        split_string = detail_string.split()
+    def table(self):
+        """Get a Statistic for the table this Statistic belongs to.
 
-        for word in split_string:
-            if in_quotes or in_braces:
-                output[-1] = ' '.join([output[-1], word])
+        Raises `LookupError` if no table can be found.
+        """
+        # Implementation is to look back through the parents of this node
+        # until we find one with "Table" in it's name.
+        def table_test(stat):
+            return True if  "Table" in stat.get_info("SNMP NAME") else False
+
+        if not self._table:
+            for ancestor in self.ancestors():
+                if table_test(ancestor):
+                    logger.debug('Found table for Statistic %s: %s',
+                                 self.get_info("SNMP NAME"),
+                                 ancestor.get_info("SNMP NAME"))
+                    break
             else:
-                output.append(word)
+                raise LookupError("OID not in table.")
+            self._table = ancestor
 
-            for character in word:
-                if character == '\"':
-                    in_quotes = not in_quotes
-                elif character == '{' or character == '}':
-                    in_braces = not in_braces
-
-        return output
+        return self._table
 
     def get_data(self, columns):
         ''' Gets the data from a stat. If the stat is an intermediate node or
@@ -162,3 +171,51 @@ class Statistic(object):
                 data = [stat.get_info(detail) for detail in columns]
 
         return data
+
+
+class memoize(collections.defaultdict):
+    """Memoize the return values from a function."""
+    def __call__(self, *args):
+        return self[args]
+    def __missing__(self, args):
+        value = self.default_factory(*args)
+        self[args] = value
+        return value
+
+
+@memoize
+def _get_tokenized_mib_details(mib_file, oid):
+    ''' Gets the details for a statistics from a MIB file.   Splits them by
+        whitespace and then regroups anything that is inside {} or "" in
+        keeping with ASN1 syntax.
+
+        Input
+        mib_file:           The MIB file defining the statistic
+        oid:                The OID of the statistic we are interested in
+        Return:             A list of tokens, where a token is either a
+                            single word or all words enclosed within {} or
+                            "".
+    '''
+    get_details_cmd = ['snmptranslate', '-m', mib_file, '-Td', oid]
+    with open('/dev/null', 'w') as the_bin:
+        detail_string = subprocess.check_output(get_details_cmd,
+                                                stderr=the_bin)
+
+    in_quotes = False
+    in_braces = False
+    output = []
+    split_string = detail_string.split()
+
+    for word in split_string:
+        if in_quotes or in_braces:
+            output[-1] = ' '.join([output[-1], word])
+        else:
+            output.append(word)
+
+        for character in word:
+            if character == '\"':
+                in_quotes = not in_quotes
+            elif character == '{' or character == '}':
+                in_braces = not in_braces
+
+    return output
