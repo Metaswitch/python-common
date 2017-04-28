@@ -29,7 +29,7 @@ test: $(ENV_DIR)/bin/python setup.py env
 	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
 
 # We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
-NO_COVERAGE="metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py"
+NO_COVERAGE="metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py,metaswitch/common/generate_stats_csv.py,metaswitch/common/mib.py"
 
 .PHONY: coverage
 coverage: $(ENV_DIR)/bin/coverage setup.py env
