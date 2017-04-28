@@ -158,6 +158,7 @@ def parse_mib_file(path):
 
         # We throw away any fields that
         # - aren't in a table
+        # - aren't leaves
         # - are index fields.
         try:
             stat.table()
@@ -165,6 +166,10 @@ def parse_mib_file(path):
             logger.debug("Stat %s is not in a table - ignoring", stat)
             return False
 
+        # We should just throw away non-leaf nodes but there's no easy way of
+        # determining that with the current arhitecture. Instead we check
+        # whether the field finished *Entry which is the only current case of
+        # non-leaf MIB fields that aren't indices.
         if stat.get_info("SNMP NAME").endswith("Entry"):
             logger.debug("Stat %s is Entry - ignoring", stat)
             return False

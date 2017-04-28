@@ -166,22 +166,31 @@ class Statistic(object):
         Raises `LookupError` if the statistic is not in a table."""
 
         field_name = self.get_info("SNMP NAME")
+
+        # Check that we're inside a table.
         self.table()
 
         for ancestor in self.ancestors():
+            logging.debug("Looking at Ancestor: %s" %
+                          ancestor.get_info("SNMP NAME"))
             ancestor_index_string = ancestor.get_info("INDEX")
             if ancestor_index_string:
-                # String should be of form { comma separated indices } or
+                # String should be of form "{ comma separated indices }" or
                 # blank if no indices. Check that there's an acutal string to
                 # parse then split it into separate elements and look for a
                 # match with the field name.
                 ancestor_index_string = ancestor_index_string[2:-2]
+                logger.debug("Checking if %s is in %s" %
+                                           (field_name, ancestor_index_string))
 
-                if len(ancestor_index_string) > 0:
+                if ancestor_index_string:
                     ancestor_index_fields = \
                           [x.strip() for x in ancestor_index_string.split(',')]
                     if field_name in ancestor_index_fields:
+                        logger.debug("%s is an index field" % field_name)
                         return True
+
+        logger.debug("%s is not an index field" % field_name)
         return False
 
 
@@ -231,8 +240,6 @@ def _get_tokenized_mib_details(mib_file, oid):
     with open('/dev/null', 'w') as the_bin:
         detail_string = subprocess.check_output(get_details_cmd,
                                                 stderr=the_bin)
-    print get_details_cmd
-
     in_quotes = False
     in_braces = False
     output = []
