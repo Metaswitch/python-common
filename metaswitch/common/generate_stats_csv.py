@@ -27,11 +27,13 @@ import argparse
 import logging
 import csv
 import StringIO
+import sys
 import collections
 import mib
 
 logger = logging.getLogger(__name__)
 
+# The headers for the output CSV, matching the order in merge_entry
 COLUMN_HEADERS = [
     "Version Introduced",
     "MIB Table Name",
@@ -100,8 +102,10 @@ def main():
     args = parse_args()
 
     parsed_mibs = parse_mib_files(args['mib_files'])
-    parsed_csv = parse_csv_file(args['csv_file'])
-
+    try:
+        parsed_csv = parse_csv_file(args['csv_file'])
+    except IOError:
+        sys.exit("Failed to open the CSV file %s." % args['csv_file'])
     merged_entries = merge_csv_with_mibs(parsed_csv, parsed_mibs)
 
     write_csv(merged_entries, args['output_file'])
@@ -109,6 +113,8 @@ def main():
 
 def setup_logging():
     """Set up basic logging."""
+    # TODO write log level lower than warnings to file if log level set
+    # lower than warning.
     level = os.getenv('LOG_LEVEL', 'WARNING')
     logging.basicConfig(level=getattr(logging, level))
 
