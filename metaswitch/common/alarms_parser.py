@@ -274,7 +274,6 @@ def alarms_to_dita(alarms_files):
             for alarm_level in alarm._levels.itervalues():
                 fields = {"OID": full_alarm_oid(alarm_level._oid),
                           "ITU severity": alarm_level._itu_severity,
-                          "Cause": alarm._cause,
                           "Severity": alarm_level._severity_string,
                           "Description": alarm_level._description,
                           "Details": alarm_level._details,
