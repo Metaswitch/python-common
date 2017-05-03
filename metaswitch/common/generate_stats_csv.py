@@ -141,6 +141,9 @@ def parse_mib_files(mib_files):
     disk.
     Returns a dict keyed by (MIB table name, MIB field name) with values
     (Source File, MIB table description, OID, MIB field description).
+    If there are any duplicate keys in the provided MIB files, the initial
+    value gets overwritten by any occurrence in a MIB file that was provided
+    after the MIB file with the first occurrence on the command line.
     """
     output = {}
     for mib_file in mib_files:
