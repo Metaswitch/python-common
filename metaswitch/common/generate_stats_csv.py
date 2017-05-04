@@ -1,19 +1,21 @@
 """Generate detailed statistics documentation.
 
 This script takes a number of MIB files and merges them with a CSV file
-containing additional data, to create an output CSV file suitable for
-sharing with RFP central and SAs.
+containing additional data, to create an output CSV file suitable for sharing
+with RFP central and SAs. If there are any duplicate keys in the provided MIB
+files, the initial value gets overwritten by any occurrence in a MIB file that
+was provided after the MIB file with the first occurrence.
 
-This is not intended to create a document suitable for sharing directly
-with customers, but it should make it simple for our customer-facing
-teams to make such documents.
+This is not intended to create a document suitable for sharing directly with
+customers, but it should make it simple for our customer-facing teams to make
+such documents.
 
 An error-level log is output for each:
 * Item in the MIB files that doesn't have corresponding extra CSV data.
 * Item in the CSV file that can't be found in the MIB files.
 
-To set the logging level, set the LOGGING_LEVEL environemnt variable
-to the name of a standard Python logging level e.g. DEBUG.
+To set the logging level, set the LOGGING_LEVEL environemnt variable to the
+name of a standard Python logging level e.g. DEBUG.
 """
 # To add new fields to the output CSV:
 # * Determine where the field comes from and add it to either
@@ -29,6 +31,7 @@ import csv
 import StringIO
 import sys
 import collections
+from argparse import RawTextHelpFormatter
 import mib
 
 logger = logging.getLogger(__name__)
@@ -121,7 +124,8 @@ def setup_logging():
 
 def parse_args():
     """Get the command-line arguments."""
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=RawTextHelpFormatter)
     parser.add_argument('mib_files', metavar='MIB', nargs='+',
                         help='The absolute path(s) of the input MIB(s).')
     parser.add_argument('csv_file', metavar='CSV',
@@ -141,6 +145,10 @@ def parse_mib_files(mib_files):
     disk.
     Returns a dict keyed by (MIB table name, MIB field name) with values
     (Source File, MIB table description, OID, MIB field description).
+    Some MIB values can appear in multiple MIB file so there should be a
+    preference by the user which MIB file should have precedence. So if there
+    are any duplicate values in several MIB files these get overwritten by the
+    later provided files on the command line.
     """
     output = {}
     for mib_file in mib_files:

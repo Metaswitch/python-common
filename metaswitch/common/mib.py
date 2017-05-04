@@ -40,7 +40,7 @@ class MibFile(object):
         """
         # Add INDEX to the list of fields to retrieve and parse - we
         # need this in order to check whether a node is a statistic or not.
-        if not "INDEX" in columns:
+        if "INDEX" not in columns:
             columns.append("INDEX")
 
         stats = {oid: Statistic(oid, self.path, columns) for
@@ -144,7 +144,7 @@ class Statistic(object):
         # Implementation is to look back through the parents of this node
         # until we find one with "Table" in it's name.
         def table_test(stat):
-            return True if  "Table" in stat.get_info("SNMP NAME") else False
+            return True if "Table" in stat.get_info("SNMP NAME") else False
 
         if not self._table:
             for ancestor in self.ancestors():
@@ -159,8 +159,7 @@ class Statistic(object):
 
         return self._table
 
-
-    def is_index_field (self):
+    def is_index_field(self):
         """Determine if this is an index field or not by stepping back through
         the ancestors inside the table.
 
@@ -186,8 +185,8 @@ class Statistic(object):
                              ancestor_index_string)
 
                 if ancestor_index_string:
-                    ancestor_index_fields = [x.strip()
-                                     for x in ancestor_index_string.split(',')]
+                    ancestor_index_fields = [
+                        x.strip() for x in ancestor_index_string.split(',')]
                     if field_name in ancestor_index_fields:
                         logger.debug("%s is an index field", field_name)
                         return True
@@ -199,7 +198,6 @@ class Statistic(object):
 
         return False
 
-
     def get_data(self, columns):
         ''' Gets the data from a stat. If the stat is an intermediate node or
             blacklisted, returns None.
@@ -209,15 +207,12 @@ class Statistic(object):
         '''
         data = None
 
-        # If MAX-ACCESS is N/A, this is an intermediate node of no interest, and
-        # we skip it.
-        if not stat.get_info('MAX-ACCESS') == "N/A":
-            stat_name = stat.get_info('SNMP NAME')
-            if should_output_stat(stat_name):
-                data = [stat.get_info(detail) for detail in columns]
+        # If MAX-ACCESS is N/A, this is an intermediate node of no interest,
+        # and we skip it.
+        if self.get_info('MAX-ACCESS') != "N/A":
+            data = [self.get_info(detail) for detail in columns]
 
         return data
-
 
     def __str__(self):
         return self.details['SNMP NAME']
@@ -227,6 +222,7 @@ class memoize(collections.defaultdict):
     """Memoize the return values from a function."""
     def __call__(self, *args):
         return self[args]
+
     def __missing__(self, args):
         value = self.default_factory(*args)
         self[args] = value
