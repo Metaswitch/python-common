@@ -32,7 +32,8 @@
 
 import unittest
 from metaswitch.common.alarms import CLEARED, CRITICAL
-from metaswitch.common.alarms_parser import parse_alarms_file, render_alarm, alarms_to_dita, alarms_to_csv
+from metaswitch.common.alarms_parser import parse_alarms_file, render_alarm, alarms_to_csv
+from metaswitch.common.alarms_to_dita import alarms_to_dita
 
 class AlarmsParserTestCase(unittest.TestCase):
     def testValidFile(self):
