@@ -38,11 +38,6 @@ class MibFile(object):
         `columns` should be a list of the properties of the statistic that we
         want to parse.
         """
-        # Add INDEX to the list of fields to retrieve and parse - we
-        # need this in order to check whether a node is a statistic or not.
-        if "INDEX" not in columns:
-            columns.append("INDEX")
-
         stats = {oid: Statistic(oid, self.path, columns) for
                  oid in self.oids}
         return stats
@@ -78,9 +73,17 @@ class Statistic(object):
         self._parent = None
 
         self.mib_file = mib_file
-        self.columns = columns
         self.details = {}
         self.oid = oid
+
+        # Add INDEX to the list of fields to retrieve and parse - we
+        # need this in order to check whether a node is a statistic or not.
+        # To do so use a copy of columns to not take ownership of the passed
+        # parameter.
+        columns_copy = columns[:]
+        if "INDEX" not in columns_copy:
+            columns_copy.append("INDEX")
+        self.columns = columns_copy
 
         tokenized_details = _get_tokenized_mib_details(mib_file, oid)
 

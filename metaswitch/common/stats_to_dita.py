@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
     mib_file = mib.MibFile(input_file)
 
-    # Generates a dictionary holding a Statistic for every OID in the OID list
+    # Generates a dictionary holding a Statistic for every OID in the OID list.
     stats = mib_file.get_all_stats(COLUMNS)
 
     # The OIDs at level oid_base_len will become individual output files
