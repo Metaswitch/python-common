@@ -17,7 +17,6 @@ import argparse
 import os
 import sys
 import json
-import copy
 import mib
 from dita_content import DITAContent
 
@@ -169,10 +168,7 @@ if __name__ == '__main__':
     mib_file = mib.MibFile(input_file)
 
     # Generates a dictionary holding a Statistic for every OID in the OID list.
-    # Pass in a copy of COLUMNS to keep ownership of this constant here as
-    # the Statistics class might modify it.
-    columns_copy = copy.copy(COLUMNS)
-    stats = mib_file.get_all_stats(columns_copy)
+    stats = mib_file.get_all_stats(COLUMNS)
 
     # The OIDs at level oid_base_len will become individual output files
     # The OIDs at level oid_base_len+1 will become tables within those output

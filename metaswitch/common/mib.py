@@ -40,10 +40,13 @@ class MibFile(object):
         """
         # Add INDEX to the list of fields to retrieve and parse - we
         # need this in order to check whether a node is a statistic or not.
-        if "INDEX" not in columns:
-            columns.append("INDEX")
+        # To do this we use a copy of columns to keep ownership of columns in
+        # the calling script.
+        columns_copy = columns[:]
+        if "INDEX" not in columns_copy:
+            columns_copy.append("INDEX")
 
-        stats = {oid: Statistic(oid, self.path, columns) for
+        stats = {oid: Statistic(oid, self.path, columns_copy) for
                  oid in self.oids}
         return stats
 
