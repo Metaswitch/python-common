@@ -76,14 +76,12 @@ def write_dita_file(alarms_files, dita_filename): #pragma: no cover
     with open(dita_filename, "w") as dita_file:
         dita_file.write(xml)
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--alarms-files', nargs="*", type=str, required=True)
+    parser.add_argument('--output-dir', type=str, required=True)
+    args = parser.parse_args()
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--alarms-files', nargs="*", type=str, required=True)
-parser.add_argument('--output-dir', type=str, required=True)
-args = parser.parse_args()
+    dita_filename = os.path.join('.', args.output_dir, 'alarms.xml')
 
-dita_filename = os.path.join('.', args.output_dir, 'alarms.xml')
-
-write_dita_file(args.alarms_files, dita_filename)
-
-
+    write_dita_file(args.alarms_files, dita_filename)
