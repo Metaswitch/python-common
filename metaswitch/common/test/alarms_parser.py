@@ -33,7 +33,6 @@
 import unittest
 from metaswitch.common.alarms import CLEARED, CRITICAL
 from metaswitch.common.alarms_parser import parse_alarms_file, render_alarm, alarms_to_csv
-from metaswitch.common.alarms_to_dita import alarms_to_dita
 
 class AlarmsParserTestCase(unittest.TestCase):
     def testValidFile(self):
@@ -48,11 +47,6 @@ class AlarmsParserTestCase(unittest.TestCase):
         alarms = parse_alarms_file('metaswitch/common/test/test_valid_alarms.json')
         test_alarm = alarms[0]
         self.assertEqual(render_alarm(test_alarm), 'NAME = (1000, 1, 3)\n')
-
-    def testDita(self):
-        expected_output = open('metaswitch/common/test/test_valid_alarms.dita').read()
-        self.assertEqual(alarms_to_dita(["metaswitch/common/test/test_valid_alarms.json"]),
-                         expected_output)
 
     def testCsv(self):
         expected_output = open('metaswitch/common/test/test_valid_alarms.csv').read()
