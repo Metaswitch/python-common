@@ -391,7 +391,7 @@ def write_core_file(process_name, contents): # pragma: no cover
         # so the dump directory doesn't exist.
         _log.exception("Can't dump core - is clearwater-diags-monitor installed?")
 
-def install_sigterm_handler(plugins):
+def install_sigterm_handler(plugins): # pragma: no cover
     def sigterm_handler(sig, stack):
         global should_quit
         _log.info("Handling SIGTERM")
