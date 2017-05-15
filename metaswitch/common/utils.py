@@ -391,16 +391,6 @@ def write_core_file(process_name, contents): # pragma: no cover
         # so the dump directory doesn't exist.
         _log.exception("Can't dump core - is clearwater-diags-monitor installed?")
 
-def install_sigquit_handler(plugins):
-    def sigquit_handler(sig, stack):
-        global should_quit
-        _log.info("Handling SIGQUIT")
-        for plugin in plugins:
-            _log.info("{} leaving cluster".format(plugin))
-            plugin.leave_cluster()
-        should_quit = True
-    signal.signal(signal.SIGQUIT, sigquit_handler)
-
 def install_sigterm_handler(plugins):
     def sigterm_handler(sig, stack):
         global should_quit
