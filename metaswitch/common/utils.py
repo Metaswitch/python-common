@@ -55,6 +55,8 @@ UUID_LEN = 20
 # The length of an audible ID in decimal digits
 UUID_LEN_AUDIBLE = 4
 
+should_quit = False
+
 def create_secure_random_id(length=UUID_LEN): # pragma: no cover
     """Securely create a new secret ID, encoded as a hex string.  The ID is
        created at random but is very likely to be unique."""
@@ -388,6 +390,17 @@ def write_core_file(process_name, contents): # pragma: no cover
         # The most likely reason for failure is that clearwater-diags-monitor isn't installed
         # so the dump directory doesn't exist.
         _log.exception("Can't dump core - is clearwater-diags-monitor installed?")
+
+def install_sigterm_handler(plugins):
+    def sigterm_handler(sig, stack):
+        global should_quit
+        _log.info("Handling SIGTERM")
+        for plugin in plugins:
+            _log.info("{} exiting cleanly".format(plugin))
+            plugin.terminate()
+            _log.info("Exited cleanly")
+        should_quit = True
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
 def install_sigusr1_handler(process_name): # pragma: no cover
     """
