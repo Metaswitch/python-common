@@ -111,7 +111,7 @@ def main():
         sys.exit("Failed to open the CSV file %s." % args['csv_file'])
     merged_entries = merge_csv_with_mibs(parsed_csv, parsed_mibs)
 
-    write_csv(merged_entries, args['output_file'])
+    write_csv(merged_entries, args['output_file'], args['cw_mode'])
 
 
 def setup_logging():
@@ -133,6 +133,13 @@ def parse_args():
     parser.add_argument('--output-file', default='./output.csv',
                         help='Optional output file name (defaults to '
                         'output.csv in the current directory).')
+    parser.add_argument('--cw-mode',
+                        action='store',
+                        dest='cw_mode',
+                        choices=['CC', 'PC'],
+                        default='CC',
+                        help='Whether to run in Clearwater Core (CC) or '
+                        'Project Clearwater (PC) mode.')
     args = vars(parser.parse_args())
     logger.debug("Command-line arguments: %s", args)
     return args
@@ -277,7 +284,7 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
     return merged_data
 
 
-def write_csv(merged_entries, output_file):
+def write_csv(merged_entries, output_file, cw_mode):
     """Output CSV file to disk.
 
     `merged_entries` should be a list of data tuples.
@@ -290,7 +297,17 @@ def write_csv(merged_entries, output_file):
 
     writer.writerow(COLUMN_HEADERS)
 
+    field_index = COLUMN_HEADERS.index("MIB Field Name")
+
     for entry in merged_entries:
+        if cw_mode == 'CC':
+            # Clearwater Core mode - ignore bono and gemini
+            if entry[field_index].startswith("bono") or \
+                                       entry[field_index].startswith("gemini"):
+                logger.debug("Ignoring entry Project Clearwater entry %s",
+                             entry[2])
+                continue
+
         writer.writerow(entry)
 
     with open(output_file, "w") as csv_file:
