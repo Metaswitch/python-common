@@ -276,10 +276,10 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
             mib_data = parsed_mibs.pop(key)
             merged_data.append(merge_entry(key, mib_data, csv_data))
         except KeyError:
-            logger.error("Missing MIB value for key %s", key)
+            logger.warning("Missing MIB value for key %s", key)
 
     for key in parsed_mibs:
-        logger.error("Missing CSV value for key %s", key)
+        logger.warning("Missing CSV value for key %s", key)
 
     return merged_data
 
