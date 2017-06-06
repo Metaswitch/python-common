@@ -28,6 +28,17 @@ setup(
     setup_requires=["cffi"],
     ext_package="metaswitch.common",
     cffi_modules=["cffi_build.py:ffi"],
-    install_requires=["py-bcrypt", "pycrypto==2.6.1", "pyzmq==16.0.2", "cffi==1.5.2", "monotonic==0.6"],
-    tests_require=["pbr==1.6", "Mock", "phonenumbers==7.1.1"]
+    install_requires=[
+        "cffi==1.10.0",
+        "monotonic==0.6",
+        "py-bcrypt==0.4",
+        "pycparser==2.17",
+        "pycrypto==2.6.1",
+        "pyzmq==16.0.2"],
+    tests_require=[
+        "funcsigs==1.0.2",
+        "Mock==2.0.0",
+        "pbr==1.6",
+        "phonenumbers==7.1.1",
+        "six==1.10.0"]
     )
