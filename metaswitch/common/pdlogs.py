@@ -60,8 +60,9 @@ CASSANDRA_CONNECTION_LOST = PDLog(
     desc="The connection to Cassandra has been lost.",
     cause="The connection to Cassandra has been lost.",
     effect="The node can no long offer services that rely on Cassandra.",
-    action="(1). Check that Cassandra is running on the node. " +\
-      "(2). Check that the configuration files in /etc/clearwater are correct. " +\
+    action="(1). Check that the Cassandra service is running reliably. " +\
+      "(2). Check that the correct Cassandra hostname is set in shared " +\
+      "configuration. " +\
       "(3). Check the right ports are open for Cassandra connectivity.",
     priority=PDLog.LOG_ERR)
 
