@@ -59,7 +59,7 @@ CASSANDRA_CONNECTION_LOST = PDLog(
     number=PDLog.CL_PYTHON_COMMON_ID + 1,
     desc="The connection to Cassandra has been lost.",
     cause="The connection to Cassandra has been lost.",
-    effect="The node can no long offer services that rely on Cassandra.",
+    effect="Cassandra backed services will not work.",
     action="(1). Check that the Cassandra service is running reliably. " +\
       "(2). Check that the correct Cassandra hostname is set in shared " +\
       "configuration. " +\
