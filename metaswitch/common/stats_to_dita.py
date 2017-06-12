@@ -187,7 +187,7 @@ if __name__ == '__main__':
     # The OIDs at level oid_base_len+1 will become tables within those output
     # files.
     file_and_table_oids = defaultdict(list)
-    table_level_oids = mib_file.get_oids_at_depth(oid_base_len+1)
+    table_level_oids = mib_file.get_oids_at_depth(oid_base_len + 1)
 
     for table_oid in table_level_oids:
         top_level_oid = table_oid.rsplit('.', 1)[0]
