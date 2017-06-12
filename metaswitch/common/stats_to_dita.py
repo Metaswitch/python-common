@@ -96,6 +96,18 @@ def write_dita_table(dictionary, table_oid, dita_content):
     dita_content.end_table()
 
 
+def should_ignore_top_level(top_level_name):
+    '''
+    Ignore a stat if it ends with "Conformance" or "ObjectGroups", or if
+    it's in the ignore_list.
+    '''
+    regex_match = re.match("^[A-Za-z]+(Conformance|ObjectGroups)$",
+                           top_level_name)
+    in_ignore_list = (top_level_name in ignore_list)
+
+    return (regex_match or in_ignore_list)
+
+
 def should_output_stat(stat_name):
     if (white_list is None) and (black_list is None):
         return True
@@ -179,7 +191,7 @@ if __name__ == '__main__':
     for table_oid in table_level_oids:
         top_level_oid = table_oid.rsplit('.', 1)[0]
         top_level_oid_name = stats[top_level_oid].get_info('SNMP NAME')
-        if top_level_oid_name not in ignore_list:
+        if not should_ignore_top_level(top_level_oid_name):
             table_oid_name = stats[table_oid].get_info('SNMP NAME')
             if should_output_stat(table_oid_name):
                 file_and_table_oids[top_level_oid].append(table_oid)
