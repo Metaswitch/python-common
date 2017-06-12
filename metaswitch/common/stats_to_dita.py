@@ -18,6 +18,7 @@ import os
 import sys
 import json
 import mib
+import re
 from dita_content import DITAContent
 
 # The column names (written as they are in the MIB file) that are to be
