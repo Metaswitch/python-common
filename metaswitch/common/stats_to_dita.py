@@ -18,6 +18,7 @@ import os
 import sys
 import json
 import mib
+import re
 from dita_content import DITAContent
 
 # The column names (written as they are in the MIB file) that are to be
@@ -94,6 +95,18 @@ def write_dita_table(dictionary, table_oid, dita_content):
                 dita_content.add_table_entry(data)
 
     dita_content.end_table()
+
+
+def should_ignore_top_level(top_level_name):
+    '''
+    Ignore a stat if it ends with "Conformance" or "ObjectGroups", or if
+    it's in the ignore_list.
+    '''
+    regex_match = re.match("^[A-Za-z]+(Conformance|ObjectGroups)$",
+                           top_level_name)
+    in_ignore_list = (top_level_name in ignore_list)
+
+    return (regex_match or in_ignore_list)
 
 
 def should_output_stat(stat_name):
@@ -174,12 +187,12 @@ if __name__ == '__main__':
     # The OIDs at level oid_base_len+1 will become tables within those output
     # files.
     file_and_table_oids = defaultdict(list)
-    table_level_oids = mib_file.get_oids_at_depth(oid_base_len+1)
+    table_level_oids = mib_file.get_oids_at_depth(oid_base_len + 1)
 
     for table_oid in table_level_oids:
         top_level_oid = table_oid.rsplit('.', 1)[0]
         top_level_oid_name = stats[top_level_oid].get_info('SNMP NAME')
-        if top_level_oid_name not in ignore_list:
+        if not should_ignore_top_level(top_level_oid_name):
             table_oid_name = stats[table_oid].get_info('SNMP NAME')
             if should_output_stat(table_oid_name):
                 file_and_table_oids[top_level_oid].append(table_oid)
