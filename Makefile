@@ -46,7 +46,7 @@ env: ${ENV_DIR}/.eggs_installed
 $(ENV_DIR)/bin/python:
 	# Set up a fresh virtual environment.
 	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
-	$(ENV_DIR)/bin/easy_install "setuptools==24"
+	$(ENV_DIR)/bin/easy_install "setuptools==24.0.0"
 	$(ENV_DIR)/bin/easy_install distribute
 	$(ENV_DIR)/bin/pip install cffi
 
