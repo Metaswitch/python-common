@@ -29,8 +29,7 @@ class MibFile(object):
                     oid_string = subprocess.check_output(command,
                                                          stderr=the_bin)
                 except OSError:
-                    raise DependencyException("Missing dependency",
-                                              "snmptranslate")
+                    raise MissingDependency("snmptranslate")
                 oid_list = oid_string.split()
             logger.debug('Generated OID list %s', oid_list)
             self._oids = oid_list
@@ -106,8 +105,7 @@ class Statistic(object):
             try:
                 name = subprocess.check_output(command, stderr=the_bin)
             except OSError:
-                raise DependencyException("Missing dependency",
-                                          "snmptranslate")
+                raise MissingDependency("snmptranslate")
 
         # name is in the form  MIB_FILE_NAME::snmp name
         self.details['SOURCE FILE'] = name.split('::')[0].strip()
@@ -259,7 +257,7 @@ def _get_tokenized_mib_details(mib_file, oid):
             detail_string = subprocess.check_output(get_details_cmd,
                                                     stderr=the_bin)
         except OSError:
-            raise DependencyException("Missing dependency", "snmptranslate")
+            raise MissingDependency("snmptranslate")
     in_quotes = False
     in_braces = False
     output = []
@@ -280,7 +278,5 @@ def _get_tokenized_mib_details(mib_file, oid):
     return output
 
 
-class DependencyException(Exception):
-    def __init__(self, message, dependency):
-        self.message = message
-        self.dependency = dependency
+class MissingDependency(Exception):
+    pass
