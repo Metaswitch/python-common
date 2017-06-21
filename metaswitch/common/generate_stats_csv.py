@@ -1,19 +1,28 @@
+# Copyright (C) Metaswitch Networks 2017
+# If license terms are provided to you in a COPYING file in the root directory
+# of the source code repository by which you are accessing this code, then
+# the license outlined in that COPYING file applies to your use.
+# Otherwise no rights are granted except for those provided to you by
+# Metaswitch Networks in a separate written agreement.
+
 """Generate detailed statistics documentation.
 
 This script takes a number of MIB files and merges them with a CSV file
-containing additional data, to create an output CSV file suitable for
-sharing with RFP central and SAs.
+containing additional data, to create an output CSV file suitable for sharing
+with RFP central and SAs. If there are any duplicate keys in the provided MIB
+files, the initial value gets overwritten by any occurrence in a MIB file that
+was provided after the MIB file with the first occurrence.
 
-This is not intended to create a document suitable for sharing directly
-with customers, but it should make it simple for our customer-facing
-teams to make such documents.
+This is not intended to create a document suitable for sharing directly with
+customers, but it should make it simple for our customer-facing teams to make
+such documents.
 
 An error-level log is output for each:
 * Item in the MIB files that doesn't have corresponding extra CSV data.
 * Item in the CSV file that can't be found in the MIB files.
 
-To set the logging level, set the LOGGING_LEVEL environemnt variable
-to the name of a standard Python logging level e.g. DEBUG.
+To set the logging level, set the LOGGING_LEVEL environemnt variable to the
+name of a standard Python logging level e.g. DEBUG.
 """
 # To add new fields to the output CSV:
 # * Determine where the field comes from and add it to either
@@ -29,6 +38,7 @@ import csv
 import StringIO
 import sys
 import collections
+from argparse import RawTextHelpFormatter
 import mib
 
 logger = logging.getLogger(__name__)
@@ -108,7 +118,7 @@ def main():
         sys.exit("Failed to open the CSV file %s." % args['csv_file'])
     merged_entries = merge_csv_with_mibs(parsed_csv, parsed_mibs)
 
-    write_csv(merged_entries, args['output_file'])
+    write_csv(merged_entries, args['output_file'], args['cw_mode'])
 
 
 def setup_logging():
@@ -121,7 +131,8 @@ def setup_logging():
 
 def parse_args():
     """Get the command-line arguments."""
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=RawTextHelpFormatter)
     parser.add_argument('mib_files', metavar='MIB', nargs='+',
                         help='The absolute path(s) of the input MIB(s).')
     parser.add_argument('csv_file', metavar='CSV',
@@ -129,6 +140,13 @@ def parse_args():
     parser.add_argument('--output-file', default='./output.csv',
                         help='Optional output file name (defaults to '
                         'output.csv in the current directory).')
+    parser.add_argument('--cw-mode',
+                        action='store',
+                        dest='cw_mode',
+                        choices=['CC', 'PC'],
+                        default='CC',
+                        help='Whether to run in Clearwater Core (CC) or '
+                        'Project Clearwater (PC) mode.')
     args = vars(parser.parse_args())
     logger.debug("Command-line arguments: %s", args)
     return args
@@ -141,9 +159,10 @@ def parse_mib_files(mib_files):
     disk.
     Returns a dict keyed by (MIB table name, MIB field name) with values
     (Source File, MIB table description, OID, MIB field description).
-    If there are any duplicate keys in the provided MIB files, the initial
-    value gets overwritten by any occurrence in a MIB file that was provided
-    after the MIB file with the first occurrence on the command line.
+    Some MIB values can appear in multiple MIB file so there should be a
+    preference by the user which MIB file should have precedence. So if there
+    are any duplicate values in several MIB files these get overwritten by the
+    later provided files on the command line.
     """
     output = {}
     for mib_file in mib_files:
@@ -264,15 +283,15 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
             mib_data = parsed_mibs.pop(key)
             merged_data.append(merge_entry(key, mib_data, csv_data))
         except KeyError:
-            logger.error("Missing MIB value for key %s", key)
+            logger.warning("Missing MIB value for key %s", key)
 
     for key in parsed_mibs:
-        logger.error("Missing CSV value for key %s", key)
+        logger.warning("Missing CSV value for key %s", key)
 
     return merged_data
 
 
-def write_csv(merged_entries, output_file):
+def write_csv(merged_entries, output_file, cw_mode):
     """Output CSV file to disk.
 
     `merged_entries` should be a list of data tuples.
@@ -285,7 +304,17 @@ def write_csv(merged_entries, output_file):
 
     writer.writerow(COLUMN_HEADERS)
 
+    field_index = COLUMN_HEADERS.index("MIB Field Name")
+
     for entry in merged_entries:
+        if cw_mode == 'CC':
+            # Clearwater Core mode - ignore bono and gemini
+            if entry[field_index].startswith("bono") or \
+                                       entry[field_index].startswith("gemini"):
+                logger.debug("Ignoring entry Project Clearwater entry %s",
+                             entry[2])
+                continue
+
         writer.writerow(entry)
 
     with open(output_file, "w") as csv_file:

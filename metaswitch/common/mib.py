@@ -1,3 +1,10 @@
+# Copyright (C) Metaswitch Networks 2017
+# If license terms are provided to you in a COPYING file in the root directory
+# of the source code repository by which you are accessing this code, then
+# the license outlined in that COPYING file applies to your use.
+# Otherwise no rights are granted except for those provided to you by
+# Metaswitch Networks in a separate written agreement.
+
 import logging
 import collections
 import subprocess
@@ -25,7 +32,11 @@ class MibFile(object):
             logger.info('Generating_OID_list from file: %s', self.path)
             with open('/dev/null', 'w') as the_bin:
                 command = ['snmptranslate', '-m', self.path, '-To']
-                oid_string = subprocess.check_output(command, stderr=the_bin)
+                try:
+                    oid_string = subprocess.check_output(command,
+                                                         stderr=the_bin)
+                except OSError:
+                    raise MissingDependency("snmptranslate")
                 oid_list = oid_string.split()
             logger.debug('Generated OID list %s', oid_list)
             self._oids = oid_list
@@ -98,8 +109,10 @@ class Statistic(object):
 
         with open('/dev/null', 'w') as the_bin:
             command = ['snmptranslate', '-m', mib_file, oid]
-            name = subprocess.check_output(command,
-                                           stderr=the_bin)
+            try:
+                name = subprocess.check_output(command, stderr=the_bin)
+            except OSError:
+                raise MissingDependency("snmptranslate")
 
         # name is in the form  MIB_FILE_NAME::snmp name
         self.details['SOURCE FILE'] = name.split('::')[0].strip()
@@ -247,8 +260,11 @@ def _get_tokenized_mib_details(mib_file, oid):
     '''
     get_details_cmd = ['snmptranslate', '-m', mib_file, '-Td', oid]
     with open('/dev/null', 'w') as the_bin:
-        detail_string = subprocess.check_output(get_details_cmd,
-                                                stderr=the_bin)
+        try:
+            detail_string = subprocess.check_output(get_details_cmd,
+                                                    stderr=the_bin)
+        except OSError:
+            raise MissingDependency("snmptranslate")
     in_quotes = False
     in_braces = False
     output = []
@@ -267,3 +283,7 @@ def _get_tokenized_mib_details(mib_file, oid):
                 in_braces = not in_braces
 
     return output
+
+
+class MissingDependency(Exception):
+    pass
