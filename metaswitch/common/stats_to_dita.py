@@ -61,7 +61,7 @@ def write_dita_file(dita_filename, dita_title, table_oids, stats):
     dita_content = DITAContent()
     dita_content.begin_section(dita_title)
 
-    sorted_table_oids = sorted(table_oids)
+    sorted_table_oids = sorted(table_oids, key=oid_sort_key)
     for table_oid in sorted_table_oids:
         write_dita_table(stats, table_oid, dita_content)
     dita_content.end_section()
@@ -85,7 +85,7 @@ def write_dita_table(dictionary, table_oid, dita_content):
 
     # Loop through the dictionary of all stats finding those that belong to
     # this table.
-    for oid in sorted(dictionary):
+    for oid in sorted(dictionary, key=oid_sort_key):
         stat = dictionary[oid]
         if (oid.startswith(table_oid + '.') or (oid == table_oid)):
             # Here we are certain that an element belongs in our table
@@ -204,3 +204,22 @@ if __name__ == '__main__':
                         file_oid_name,
                         table_oids,
                         stats)
+
+
+def oid_sort_key(oid):
+    """Sorts OIDs lexicographically.
+
+    `oid` is a string containing an OID in numeric form e.g.
+    ".1.2.3" or "342.3.2".
+    For use as a key function in sorting tools like `sorted`."""
+    # OIDs:
+    # * May start with an optional '.'
+    # * Are a sequence of decimal characters separated by '.'s.
+    oid = oid.strip()
+    oid = oid.lstrip('.')
+
+    # Use ints to make sure e.g. 11 comes after 2.
+    # Lists are sorted lexicographically.
+    # If components aren't valid, crash so that we find out ASAP and
+    # fix the OID definition.
+    return [int(x) for x in oid.split('.')]
