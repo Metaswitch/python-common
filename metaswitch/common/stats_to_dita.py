@@ -211,12 +211,14 @@ def oid_sort_key(oid):
 
     `oid` is a string containing an OID in numeric form e.g.
     ".1.2.3" or "342.3.2".
-    For use as a key function in sorting tools like `sorted`."""
+    For use as a key function in sorting tools like `sorted`.
+
+    This function is deliberately brittle - it fails if OIDs
+    are not as expected. This forces us to fix up any bad OIDs."""
     # OIDs:
     # * May start with an optional '.'
     # * Are a sequence of decimal characters separated by '.'s.
-    oid = oid.strip()
-    oid = oid.lstrip('.')
+    oid = oid.strip('.')
 
     # Use ints to make sure e.g. 11 comes after 2.
     # Lists are sorted lexicographically.
