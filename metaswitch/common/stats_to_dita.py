@@ -127,6 +127,27 @@ def should_output_stat(stat_name):
     return (stat_name not in black_list)
 
 
+def oid_sort_key(oid):
+    """Sorts OIDs lexicographically.
+
+    `oid` is a string containing an OID in numeric form e.g.
+    ".1.2.3" or "342.3.2".
+    For use as a key function in sorting tools like `sorted`.
+
+    This function is deliberately brittle - it fails if OIDs
+    are not as expected. This forces us to fix up any bad OIDs."""
+    # OIDs:
+    # * May start with an optional '.'
+    # * Are a sequence of decimal characters separated by '.'s.
+    oid = oid.strip('.')
+
+    # Use ints to make sure e.g. 11 comes after 2.
+    # Lists are sorted lexicographically.
+    # If components aren't valid, crash so that we find out ASAP and
+    # fix the OID definition.
+    return [int(x) for x in oid.split('.')]
+
+
 if __name__ == '__main__':
     # Do some arg parsing
     parser = argparse.ArgumentParser(
@@ -204,24 +225,3 @@ if __name__ == '__main__':
                         file_oid_name,
                         table_oids,
                         stats)
-
-
-def oid_sort_key(oid):
-    """Sorts OIDs lexicographically.
-
-    `oid` is a string containing an OID in numeric form e.g.
-    ".1.2.3" or "342.3.2".
-    For use as a key function in sorting tools like `sorted`.
-
-    This function is deliberately brittle - it fails if OIDs
-    are not as expected. This forces us to fix up any bad OIDs."""
-    # OIDs:
-    # * May start with an optional '.'
-    # * Are a sequence of decimal characters separated by '.'s.
-    oid = oid.strip('.')
-
-    # Use ints to make sure e.g. 11 comes after 2.
-    # Lists are sorted lexicographically.
-    # If components aren't valid, crash so that we find out ASAP and
-    # fix the OID definition.
-    return [int(x) for x in oid.split('.')]
