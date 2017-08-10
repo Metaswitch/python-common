@@ -31,8 +31,7 @@ setup(
     install_requires=[
         "cffi==1.10.0",
         "monotonic==0.6",
-        "py-bcrypt==0.4",
-        "pycparser==2.17",
+        "pycparser==2.18",
         "pycrypto==2.6.1",
         "pyzmq==16.0.2"],
     tests_require=[
