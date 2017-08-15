@@ -12,14 +12,11 @@ import sys
 import re
 import logging
 import math
-import binascii
-import base64
 import traceback
 import hashlib
 import time
 import signal
 from urllib import quote
-from Crypto.Cipher import Blowfish
 from fcntl import flock, LOCK_EX, LOCK_NB
 
 _log = logging.getLogger("metaswitch.utils")
@@ -101,6 +98,15 @@ def _create_secure_id_bits_function(alphabet):
     return create_id
 
 create_secure_human_readable_id = _create_secure_id_bits_function(_HUMAN_SAFE_ALPHABET)
+"""Securely creates an ID using characters that are appropriate for human
+copying.
+
+strength_in_bits: the number of bits of entropy that must be incorporated
+into the key.  The function tries to minimize the length of the key while
+still providing that much entropy.
+"""
+
+create_secure_mixed_case_human_readable_id = _create_secure_id_bits_function(_HUMAN_SAFE_MIXED_CASE_ALPHABET)
 """Securely creates an ID using characters that are appropriate for human
 copying.
 
