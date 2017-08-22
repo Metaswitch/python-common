@@ -33,6 +33,8 @@ class PDLog(object):
     # Range 17000 to 17999 is reserved
     # Range 18000 to 18999 is reserved
     # Range 19000 to 19999 is reserved
+    # Range 20000 to 20999 is reserved
+    # Range 21000 to 21999 is reserved
 
     def __init__(self, number, desc, cause, effect, action, priority):
         """Defines a particular log's priority and log text.
