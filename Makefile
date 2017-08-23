@@ -95,3 +95,6 @@ VPATH = cpp-common/src:cpp-common/include
 
 libclearwaterutils.a: namespace_hop.o logger.o log.o
 	ar cr libclearwaterutils.a $^
+
+BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.eggs
+include build-infra/python.mk
