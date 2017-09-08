@@ -4,6 +4,8 @@ PYTHON_BIN := $(shell which python)
 
 COMPILER_FLAGS := LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
 
+FLAKE8 := ${ENV_DIR}/bin/flake8
+
 # The build has been seen to fail on Mac OSX when trying to build on i386. Enable this to build for x86_64 only
 X86_64_ONLY=0
 
@@ -16,14 +18,14 @@ all: help
 help:
 	@cat README.md
 
-verify:
-	flake8 --select=E10,E11,E9,F metaswitch/
+verify: ${FLAKE8}
+	${FLAKE8} --select=E10,E11,E9,F metaswitch/
 
-style:
-	flake8 --select=E,W,C,N --max-line-length=100 metaswitch/
+style: ${FLAKE8}
+	${FLAKE8} --select=E,W,C,N --max-line-length=100 metaswitch/
 
-explain-style:
-	flake8 --select=E,W,C,N --show-pep8 --first --max-line-length=100 metaswitch/
+explain-style: ${FLAKE8}
+	${FLAKE8} --select=E,W,C,N --show-pep8 --first --max-line-length=100 metaswitch/
 
 .PHONY: test
 test: $(ENV_DIR)/bin/python setup.py env
@@ -42,6 +44,9 @@ coverage: $(ENV_DIR)/bin/coverage setup.py env
 
 .PHONY: env
 env: ${ENV_DIR}/.eggs_installed
+
+${FLAKE8}: ${ENV_DIR}/bin/python
+	${ENV_DIR}/bin/pip install flake8
 
 $(ENV_DIR)/bin/python:
 	# Set up a fresh virtual environment.
