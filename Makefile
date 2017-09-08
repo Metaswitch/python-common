@@ -43,7 +43,7 @@ coverage: $(ENV_DIR)/bin/coverage setup.py env
 	_env/bin/coverage html
 
 .PHONY: env
-env: ${ENV_DIR}/.eggs_installed
+env: ${ENV_DIR}/.wheels_installed
 
 ${FLAKE8}: ${ENV_DIR}/bin/python
 	${ENV_DIR}/bin/pip install flake8
@@ -58,19 +58,23 @@ $(ENV_DIR)/bin/python:
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
 
-.PHONY: build_common_egg
-build_common_egg: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
-	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d $(EGG_DIR)
+.PHONY: build_common_wheel
+build_common_wheel: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
+	$(COMPILER_FLAGS) ${ENV_DIR}/bin/pip wheel -w ${WHEELHOUSE} -r requirements.txt .
 
-${ENV_DIR}/.eggs_installed : $(ENV_DIR)/bin/python setup.py $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
-	# Generate .egg files for python-common
-	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_egg -d .eggs
+${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
+	rm -rf .wheelhouse
 
-	# Download the egg files they depend upon
-	${ENV_DIR}/bin/easy_install -zmaxd .eggs/ .eggs/*.egg
+	# Generate .whl files for python-common and dependencies
+	$(COMPILER_FLAGS) ${ENV_DIR}/bin/pip wheel -w .wheelhouse -r requirements.txt .
 
-	# Install the downloaded egg files
-	${ENV_DIR}/bin/easy_install --allow-hosts=None -f .eggs/ .eggs/*.egg
+	# Install the downloaded wheels
+	${ENV_DIR}/bin/pip install --compile \
+							   --no-index \
+							   --upgrade \
+							   --force-reinstall \
+							   --find-links=.wheelhouse \
+							   metaswitchcommon
 
 	# Touch the sentinel file
 	touch $@
@@ -87,7 +91,7 @@ pyclean:
 
 .PHONY: envclean
 envclean:
-	rm -rf bin .eggs .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
+	rm -rf bin .wheelhouse .wheels_installed .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
 	rm -f metaswitch/common/_cffi.so *.o libclearwaterutils.a
