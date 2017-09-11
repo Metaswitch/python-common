@@ -58,15 +58,17 @@ $(ENV_DIR)/bin/python:
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
 
+# Target for building a wheel from this package into the specified wheelhouse
 .PHONY: build_common_wheel
 build_common_wheel: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
-	$(COMPILER_FLAGS) ${ENV_DIR}/bin/pip wheel -w ${WHEELHOUSE} -r requirements.txt .
+	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_wheel -d ${WHEELHOUSE}
 
+# Install this package, and it's dependencies into the environment
 ${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	rm -rf .wheelhouse
 
 	# Generate .whl files for python-common and dependencies
-	$(COMPILER_FLAGS) ${ENV_DIR}/bin/pip wheel -w .wheelhouse -r requirements.txt .
+	$(COMPILER_FLAGS) ${ENV_DIR}/bin/pip wheel -w .wheelhouse -r requirements.txt -r requirements-test.txt .
 
 	# Install the downloaded wheels
 	${ENV_DIR}/bin/pip install --compile \

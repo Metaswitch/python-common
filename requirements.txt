@@ -2,11 +2,4 @@ cffi==1.10.0
 monotonic==0.6
 pycparser==2.18
 pycrypto==2.6.1
-pyzmq==16.0.2,
-
-# Test dependencies
-funcsigs==1.0.2
-Mock==2.0.0
-pbr==1.6
-phonenumbers==7.1.1
-six==1.10.0
+pyzmq==16.0.2
