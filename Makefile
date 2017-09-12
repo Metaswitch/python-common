@@ -71,7 +71,7 @@ ${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $
 	rm -rf .wheelhouse
 
 	# Enforce a recent version of pip is installed
-	${PIP} install --upgrade pip==7.0.1
+	${PIP} install --upgrade pip==9.0.1
 
 	# Check that pip wheel is installed
 	${PIP} install wheel
