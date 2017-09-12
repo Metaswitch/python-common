@@ -64,6 +64,12 @@ $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 # Target for building a wheel from this package into the specified wheelhouse
 .PHONY: build_common_wheel
 build_common_wheel: $(PYTHON) setup.py libclearwaterutils.a
+	# Enforce a recent version of pip is installed
+	${PIP} install --upgrade pip==9.0.1
+
+	# Check that pip wheel is installed
+	${PIP} install wheel
+
 	$(COMPILER_FLAGS) ${PYTHON} setup.py bdist_wheel -d ${WHEELHOUSE}
 
 # Install this package, and it's dependencies into the environment
