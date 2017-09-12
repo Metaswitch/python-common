@@ -6,6 +6,9 @@ COMPILER_FLAGS := LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
 
 FLAKE8 := ${ENV_DIR}/bin/flake8
 
+BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.wheelhouse
+include build-infra/python.mk
+
 # The build has been seen to fail on Mac OSX when trying to build on i386. Enable this to build for x86_64 only
 X86_64_ONLY=0
 
@@ -48,35 +51,30 @@ env: ${ENV_DIR}/.wheels_installed
 ${FLAKE8}: ${ENV_DIR}/bin/python
 	${ENV_DIR}/bin/pip install flake8
 
-$(ENV_DIR)/bin/python:
+${PYTHON}:
 	# Set up a fresh virtual environment.
 	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
 	$(ENV_DIR)/bin/easy_install "setuptools==24"
 	$(ENV_DIR)/bin/easy_install distribute
-	$(ENV_DIR)/bin/pip install cffi
+	$(PIP) install cffi
 
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
 
 # Target for building a wheel from this package into the specified wheelhouse
 .PHONY: build_common_wheel
-build_common_wheel: $(ENV_DIR)/bin/python setup.py libclearwaterutils.a
-	$(COMPILER_FLAGS) ${ENV_DIR}/bin/python setup.py bdist_wheel -d ${WHEELHOUSE}
+build_common_wheel: $(PYTHON) setup.py libclearwaterutils.a
+	$(COMPILER_FLAGS) ${PYTHON} setup.py bdist_wheel -d ${WHEELHOUSE}
 
 # Install this package, and it's dependencies into the environment
 ${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	rm -rf .wheelhouse
 
 	# Generate .whl files for python-common and dependencies
-	$(COMPILER_FLAGS) ${ENV_DIR}/bin/pip wheel -w .wheelhouse -r requirements.txt -r requirements-test.txt .
+	$(COMPILER_FLAGS) ${PIP} wheel -w .wheelhouse -r requirements.txt -r requirements-test.txt .
 
 	# Install the downloaded wheels
-	${ENV_DIR}/bin/pip install --compile \
-							   --no-index \
-							   --upgrade \
-							   --force-reinstall \
-							   --find-links=.wheelhouse \
-							   metaswitchcommon
+	${INSTALLER} --find-links=.wheelhouse metaswitchcommon
 
 	# Touch the sentinel file
 	touch $@
@@ -106,6 +104,3 @@ VPATH = cpp-common/src:cpp-common/include
 
 libclearwaterutils.a: namespace_hop.o logger.o log.o
 	ar cr libclearwaterutils.a $^
-
-BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.eggs
-include build-infra/python.mk
