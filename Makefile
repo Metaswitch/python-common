@@ -70,6 +70,9 @@ build_common_wheel: $(PYTHON) setup.py libclearwaterutils.a
 ${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	rm -rf .wheelhouse
 
+	# Enforce a recent version of pip is installed
+	${PIP} install --upgrade pip==7.0.1
+
 	# Check that pip wheel is installed
 	${PIP} install wheel
 
