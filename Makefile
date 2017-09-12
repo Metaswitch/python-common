@@ -71,10 +71,13 @@ ${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $
 	rm -rf .wheelhouse
 
 	# Generate .whl files for python-common and dependencies
-	$(COMPILER_FLAGS) ${PIP} wheel -w .wheelhouse -r requirements.txt -r requirements-test.txt .
+	$(COMPILER_FLAGS) ${PIP} wheel -w .wheelhouse -r requirements.txt .
 
 	# Install the downloaded wheels
 	${INSTALLER} --find-links=.wheelhouse metaswitchcommon
+
+	# Install the test dependencies
+	${PIP} install -r requirements-test.txt
 
 	# Touch the sentinel file
 	touch $@
@@ -91,7 +94,7 @@ pyclean:
 
 .PHONY: envclean
 envclean:
-	rm -rf bin .wheelhouse .wheels_installed .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
+	rm -rf bin .eggs .wheelhouse .wheels_installed .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
 	rm -rf distribute-*.tar.gz
 	rm -rf $(ENV_DIR)
 	rm -f metaswitch/common/_cffi.so *.o libclearwaterutils.a
