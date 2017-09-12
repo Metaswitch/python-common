@@ -9,9 +9,9 @@ build
 bin
 bootstrap.py
 develop-eggs
-eggs
 htmlcov
 .eggs
+.wheelhouse
 *.a
 *.o
 *.so

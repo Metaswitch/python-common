@@ -1,0 +1,5 @@
+cffi==1.10.0
+monotonic==0.6
+pycparser==2.18
+pycrypto==2.6.1
+pyzmq==16.0.2
