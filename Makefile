@@ -70,6 +70,9 @@ build_common_wheel: $(PYTHON) setup.py libclearwaterutils.a
 ${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 	rm -rf .wheelhouse
 
+	# Check that pip wheel is installed
+	${PIP} install wheel
+
 	# Generate .whl files for python-common and dependencies
 	$(COMPILER_FLAGS) ${PIP} wheel -w .wheelhouse -r requirements.txt .
 
