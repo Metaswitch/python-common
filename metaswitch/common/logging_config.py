@@ -44,7 +44,7 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         if tmpstream:
             tmpstream.close() #pragma: no cover
         currentTime = int(time.time())
-        self.baseFilename = getCurrentFilename(datetime.fromtimestamp(currentTime),
+        self.baseFilename = getCurrentFilename(datetime.utcfromtimestamp(currentTime),
                                                self._log_directory,
                                                self._logfile_prefix)
         self.stream = os.fdopen(os.open(self.baseFilename, os.O_WRONLY | os.O_CREAT, 0644), self.mode)
