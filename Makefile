@@ -4,8 +4,7 @@ PYTHON_BIN := $(shell which python)
 
 COMPILER_FLAGS := LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
 
-FLAKE8 := ${ENV_DIR}/bin/flake8
-
+FLAKE8_INCLUDE_DIR = metaswitch/
 BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.wheelhouse
 include build-infra/python.mk
 
@@ -21,17 +20,15 @@ all: help
 help:
 	@cat README.md
 
-verify: ${FLAKE8}
-	${FLAKE8} --select=E10,E11,E9,F metaswitch/
-
-style: ${FLAKE8}
-	${FLAKE8} --select=E,W,C,N --max-line-length=100 metaswitch/
-
-explain-style: ${FLAKE8}
-	${FLAKE8} --select=E,W,C,N --show-pep8 --first --max-line-length=100 metaswitch/
+python_common_SETUP = setup.py
+python_common_REQUIREMENTS = requirements.txt requirements-test.txt
+python_common_FLAGS = LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
+python_common_WHEELS = metaswitchcommon
+python_common_SOURCES = $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
+$(eval $(call test_python_component,python_common))
 
 .PHONY: test
-test: $(ENV_DIR)/bin/python setup.py env
+test: install-wheels
 	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
 
 # We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
@@ -48,51 +45,13 @@ coverage: $(ENV_DIR)/bin/coverage setup.py env
 .PHONY: env
 env: ${ENV_DIR}/.wheels_installed
 
-${FLAKE8}: ${ENV_DIR}/bin/python
-	${ENV_DIR}/bin/pip install flake8
-
-${PYTHON}:
-	# Set up a fresh virtual environment.
-	virtualenv --setuptools --python=$(PYTHON_BIN) $(ENV_DIR)
-	$(ENV_DIR)/bin/easy_install "setuptools==24"
-	$(ENV_DIR)/bin/easy_install distribute
-	$(PIP) install cffi
-
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
 
-# Target for building a wheel from this package into the specified wheelhouse
-.PHONY: build_common_wheel
-build_common_wheel: $(PYTHON) setup.py libclearwaterutils.a
-	# Enforce a recent version of pip is installed
-	${PIP} install --upgrade pip==9.0.1
 
-	# Check that pip wheel is installed
-	${PIP} install wheel
-
-	$(COMPILER_FLAGS) ${PYTHON} setup.py bdist_wheel -d ${WHEELHOUSE}
-
-# Install this package, and it's dependencies into the environment
-${ENV_DIR}/.wheels_installed : $(ENV_DIR)/bin/python setup.py requirements.txt $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
-	rm -rf .wheelhouse
-
-	# Enforce a recent version of pip is installed
-	${PIP} install --upgrade pip==9.0.1
-
-	# Check that pip wheel is installed
-	${PIP} install wheel
-
-	# Generate .whl files for python-common and dependencies
-	$(COMPILER_FLAGS) ${PIP} wheel -w .wheelhouse -r requirements.txt .
-
-	# Install the downloaded wheels
-	${INSTALLER} --find-links=.wheelhouse metaswitchcommon
-
-	# Install the test dependencies
-	${PIP} install -r requirements-test.txt
-
-	# Touch the sentinel file
-	touch $@
+# TODO
+#
+#	$(PIP) install cffi
 
 .PHONY: clean
 clean: envclean pyclean
