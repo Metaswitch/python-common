@@ -25,7 +25,7 @@ python_common_REQUIREMENTS = requirements.txt requirements-test.txt
 python_common_FLAGS = LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
 python_common_WHEELS = metaswitchcommon
 python_common_SOURCES = $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
-$(eval $(call test_python_component,python_common))
+$(eval $(call python_component,python_common))
 
 .PHONY: test
 test: install-wheels
@@ -42,16 +42,16 @@ coverage: $(ENV_DIR)/bin/coverage setup.py env
 	_env/bin/coverage report -m --fail-under 100
 	_env/bin/coverage html
 
+# Target for building a wheel from this package into the specified wheelhouse
+.PHONY: build_common_wheel
+build_common_wheel: ${PIP} setup.py libclearwaterutils.a
+	$(COMPILER_FLAGS) ${PYTHON} setup.py bdist_wheel -d ${WHEELHOUSE}
+
 .PHONY: env
-env: ${ENV_DIR}/.wheels_installed
+env: ${ENV_DIR}/.wheels-installed
 
 $(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
 	$(ENV_DIR)/bin/pip install coverage
-
-
-# TODO
-#
-#	$(PIP) install cffi
 
 .PHONY: clean
 clean: envclean pyclean
