@@ -3,7 +3,7 @@ ENV_DIR := $(shell pwd)/_env
 PYTHON_BIN := $(shell which python)
 
 COMPILER_FLAGS := LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
-SRC_DIR = .
+CLEAN_SRC_DIR = .
 
 # We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
 COVERAGE_EXCL = **/test/**,metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py,metaswitch/common/generate_stats_csv.py,metaswitch/common/mib.py
