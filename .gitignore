@@ -6,6 +6,7 @@
 .installed.cfg
 _env
 build
+build_setup
 bin
 bootstrap.py
 develop-eggs
