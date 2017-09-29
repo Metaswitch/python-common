@@ -11,8 +11,10 @@ bin
 bootstrap.py
 develop-eggs
 htmlcov
+coverage.xml
 .eggs
 .wheelhouse
+python_common_wheelhouse
 *.a
 *.o
 *.so
