@@ -3,7 +3,12 @@ ENV_DIR := $(shell pwd)/_env
 PYTHON_BIN := $(shell which python)
 
 COMPILER_FLAGS := LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
+SRC_DIR = .
 
+# We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
+COVERAGE_EXCL = **/test/**,metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py,metaswitch/common/generate_stats_csv.py,metaswitch/common/mib.py
+COVERAGE_SETUP_PY = setup.py
+COVERAGE_SRC_DIR = metaswitch
 FLAKE8_INCLUDE_DIR = metaswitch/
 BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.wheelhouse
 include build-infra/python.mk
@@ -31,16 +36,6 @@ $(eval $(call python_component,python_common))
 test: install-wheels
 	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
 
-# We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
-NO_COVERAGE="metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py,metaswitch/common/generate_stats_csv.py,metaswitch/common/mib.py"
-
-.PHONY: coverage
-coverage: $(ENV_DIR)/bin/coverage setup.py env
-	rm -rf htmlcov/
-	_env/bin/coverage erase
-	$(COMPILER_FLAGS) _env/bin/coverage run --source metaswitch --omit "**/test/**,$(NO_COVERAGE)"  setup.py test
-	_env/bin/coverage report -m --fail-under 100
-	_env/bin/coverage html
 
 # Target for building a wheel from this package into the specified wheelhouse
 .PHONY: build_common_wheel
@@ -49,27 +44,6 @@ build_common_wheel: ${PIP} setup.py libclearwaterutils.a
 
 .PHONY: env
 env: ${ENV_DIR}/.wheels-installed
-
-$(ENV_DIR)/bin/coverage: $(ENV_DIR)/bin/python
-	$(ENV_DIR)/bin/pip install coverage
-
-.PHONY: clean
-clean: envclean pyclean
-
-.PHONY: pyclean
-pyclean:
-	find . -name \*.pyc -exec rm -f {} \;
-	rm -rf *.egg-info dist
-	rm -f .coverage
-	rm -rf htmlcov/
-
-.PHONY: envclean
-envclean:
-	rm -rf bin .eggs .wheelhouse .wheels_installed .develop-eggs parts .installed.cfg bootstrap.py .downloads .buildout_downloads
-	rm -rf distribute-*.tar.gz
-	rm -rf $(ENV_DIR)
-	rm -f metaswitch/common/_cffi.so *.o libclearwaterutils.a
-
 
 VPATH = cpp-common/src:cpp-common/include
 
