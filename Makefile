@@ -7,7 +7,6 @@ CLEAN_SRC_DIR = .
 
 # We have not written UTs for a number of modules that do not justify it.   Exclude them from coverage results.
 COVERAGE_EXCL = **/test/**,metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py,metaswitch/common/generate_stats_csv.py,metaswitch/common/mib.py
-COVERAGE_SETUP_PY = setup.py
 COVERAGE_SRC_DIR = metaswitch
 FLAKE8_INCLUDE_DIR = metaswitch/
 BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.wheelhouse
