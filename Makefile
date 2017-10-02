@@ -31,18 +31,10 @@ python_common_WHEELS = metaswitchcommon
 python_common_SOURCES = $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 $(eval $(call python_component,python_common))
 
-.PHONY: test
-test: install-wheels
-	$(COMPILER_FLAGS) $(ENV_DIR)/bin/python setup.py test
-
-
 # Target for building a wheel from this package into the specified wheelhouse
 .PHONY: build_common_wheel
 build_common_wheel: ${PIP} setup.py libclearwaterutils.a
 	$(COMPILER_FLAGS) ${PYTHON} setup.py bdist_wheel -d ${WHEELHOUSE}
-
-.PHONY: env
-env: ${ENV_DIR}/.wheels-installed
 
 VPATH = cpp-common/src:cpp-common/include
 
