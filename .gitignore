@@ -6,12 +6,15 @@
 .installed.cfg
 _env
 build
+build_setup
 bin
 bootstrap.py
 develop-eggs
 htmlcov
+coverage.xml
 .eggs
 .wheelhouse
+python_common_wheelhouse
 *.a
 *.o
 *.so
