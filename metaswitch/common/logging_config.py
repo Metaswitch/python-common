@@ -84,13 +84,8 @@ def common_logging(handler, log_level, log_format, task_id=None):
     for h in root_log.handlers:
         root_log.removeHandler(h)
 
-    if show_thread:
-        fmt = THREAD_FORMAT
-    else: #pragma: no cover
-        fmt = NO_THREAD_FORMAT
-
-    fmt.converter = time.gmtime
-    handler.setFormatter(fmt)
+    log_format.converter = time.gmtime
+    handler.setFormatter(log_format)
     handler.setLevel(log_level)
     root_log.addHandler(handler)
 
