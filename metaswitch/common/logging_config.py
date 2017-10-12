@@ -51,34 +51,39 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self.stream = os.fdopen(os.open(self.baseFilename, os.O_WRONLY | os.O_CREAT, 0644), self.mode)
         self.next_file_change = (int(currentTime / 3600) * 3600) + 3600
 
+
 def configure_logging(log_level,
                       log_dir,
                       log_prefix,
-                      show_thread=False,
-                      **kwargs):
+                      task_id=None,
+                      show_thread=False):
     """Utility function for configuring python logging.
     - log_dir specifies the directory logs will be written to
     - log_prefix is a prefix applied to each file in that directory.
     - if show_thread is True, include the thread name in logs."""
+    # Construct the handler to pass in to the common logging function.
+    if task_id:
+        log_prefix += "-{}".format(task_id)
     handler = ClearwaterLogHandler(log_dir, log_prefix)
-    log_format = THREAD_FORMAT if show_thread else NO_THREAD_FORMAT
-    common_logging(handler, log_level, log_format, **kwargs)
 
-def configure_syslog(log_level, facility=SysLogHandler.LOG_USER, **kwargs):
+    log_format = THREAD_FORMAT if show_thread else NO_THREAD_FORMAT
+
+    common_logging(handler, log_level, log_format)
+
+
+def configure_syslog(log_level, facility=SysLogHandler.LOG_USER):
     """Utility function for sending logs to the local syslog daemon. Users can
     specify the facility the message is sent with.
 
     Note that a separate rsyslog script will need to be written to write the
     incoming syslog messages to file."""
     handler = SysLogHandler(address="/dev/log", facility=facility)
-    common_logging(handler, log_level, NO_TIME_FORMAT, **kwargs)
+    common_logging(handler, log_level, NO_TIME_FORMAT)
 
-def common_logging(handler, log_level, log_format, task_id=None):
-    if task_id:
-        log_prefix += "-{}".format(task_id)
 
+def common_logging(handler, log_level, log_format):
     # Configure the root logger to accept all messages. We control the log
-    # level through the handler attached to it (see below).
+    # level through the handler attached to it.
     root_log = logging.getLogger()
     root_log.setLevel(logging.DEBUG)
     for h in root_log.handlers:
