@@ -11,12 +11,13 @@ import time
 import os, sys, traceback
 from datetime import datetime
 import logging
-from logging.handlers import BaseRotatingHandler
+from logging.handlers import BaseRotatingHandler, SysLogHandler
 
 # Make the same log formatters available to test code, event though
 # it doesn't want to use the full logging config.
 THREAD_FORMAT = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d (thread %(threadName)s): %(message)s', "%d-%m-%Y %H:%M:%S")
 NO_THREAD_FORMAT = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
+NO_TIME_FORMAT = logging.Formatter('%(levelname)s %(filename)s:%(lineno)d: %(message)s')
 
 
 def getCurrentFilename(currentTime, log_dir, prefix):
@@ -51,25 +52,45 @@ class ClearwaterLogHandler(BaseRotatingHandler):
         self.next_file_change = (int(currentTime / 3600) * 3600) + 3600
 
 
-def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=False):
+def configure_logging(log_level,
+                      log_dir,
+                      log_prefix,
+                      task_id=None,
+                      show_thread=False):
+    """Utility function for configuring python logging.
+    - log_dir specifies the directory logs will be written to
+    - log_prefix is a prefix applied to each file in that directory.
+    - if show_thread is True, include the thread name in logs."""
+    # Construct the handler to pass in to the common logging function.
     if task_id:
         log_prefix += "-{}".format(task_id)
+    handler = ClearwaterLogHandler(log_dir, log_prefix)
 
-    # Configure the root logger to accept all messages. We control the log level
-    # through the handler attached to it (see below).
+    log_format = THREAD_FORMAT if show_thread else NO_THREAD_FORMAT
+
+    common_logging(handler, log_level, log_format)
+
+
+def configure_syslog(log_level, facility=SysLogHandler.LOG_USER):
+    """Utility function for sending logs to the local syslog daemon. Users can
+    specify the facility the message is sent with.
+
+    Note that a separate rsyslog script will need to be written to write the
+    incoming syslog messages to file."""
+    handler = SysLogHandler(address="/dev/log", facility=facility)
+    common_logging(handler, log_level, NO_TIME_FORMAT)
+
+
+def common_logging(handler, log_level, log_format):
+    # Configure the root logger to accept all messages. We control the log
+    # level through the handler attached to it.
     root_log = logging.getLogger()
     root_log.setLevel(logging.DEBUG)
     for h in root_log.handlers:
         root_log.removeHandler(h)
 
-    if show_thread:
-        fmt = THREAD_FORMAT
-    else: #pragma: no cover
-        fmt = NO_THREAD_FORMAT
-
-    fmt.converter = time.gmtime
-    handler = ClearwaterLogHandler(log_dir, log_prefix)
-    handler.setFormatter(fmt)
+    log_format.converter = time.gmtime
+    handler.setFormatter(log_format)
     handler.setLevel(log_level)
     root_log.addHandler(handler)
 
@@ -79,7 +100,9 @@ def configure_logging(log_level, log_dir, log_prefix, task_id=None, show_thread=
   Exception: {0}
   Detail: {1}
   Traceback:
-  {2}""".format(str(type.__name__), str(value), "".join(traceback.format_tb(tb))))
+  {2}""".format(str(type.__name__),
+                str(value),
+                "".join(traceback.format_tb(tb))))
         sys.__excepthook__(type, value, tb)
 
     # Install exception handler
