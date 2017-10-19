@@ -81,7 +81,7 @@ def configure_syslog(tag, log_level, facility=SysLogHandler.LOG_USER):
     incoming syslog messages to file. It is suggested that it filters based on
     the configured tag."""
     handler = SysLogHandler(address="/dev/log", facility=facility)
-    syslog_format = logging.formatter(NO_TIME_FORMAT_STRING.format(tag=tag)
+    syslog_format = logging.Formatter(NO_TIME_FORMAT_STRING.format(tag=tag))
     common_logging(handler, log_level, syslog_format)
 
 

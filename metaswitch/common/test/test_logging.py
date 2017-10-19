@@ -43,7 +43,7 @@ class LoggingTestCase(unittest.TestCase):
                 autospec=True)
     def test_syslog(self, mock_syslog):
         """Test that messages are logged to syslog."""
-        configure_syslog(logging.DEBUG)
+        configure_syslog("test_logging", logging.DEBUG)
         mock_syslog.return_value.level = logging.DEBUG
         log = logging.getLogger()
         log.info("Try writing a log")
