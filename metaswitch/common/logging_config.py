@@ -17,7 +17,9 @@ from logging.handlers import BaseRotatingHandler, SysLogHandler
 # it doesn't want to use the full logging config.
 THREAD_FORMAT = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d (thread %(threadName)s): %(message)s', "%d-%m-%Y %H:%M:%S")
 NO_THREAD_FORMAT = logging.Formatter('%(asctime)s.%(msecs)03d UTC %(levelname)s %(filename)s:%(lineno)d: %(message)s', "%d-%m-%Y %H:%M:%S")
-NO_TIME_FORMAT = logging.Formatter('%(levelname)s %(filename)s:%(lineno)d: %(message)s')
+
+# We insert a tag into this string before turning it into a formatter.
+NO_TIME_FORMAT_STRING = '{tag}: %(levelname)s %(filename)s:%(lineno)d: %(message)s'
 
 
 def getCurrentFilename(currentTime, log_dir, prefix):
@@ -71,14 +73,16 @@ def configure_logging(log_level,
     common_logging(handler, log_level, log_format)
 
 
-def configure_syslog(log_level, facility=SysLogHandler.LOG_USER):
+def configure_syslog(tag, log_level, facility=SysLogHandler.LOG_USER):
     """Utility function for sending logs to the local syslog daemon. Users can
     specify the facility the message is sent with.
 
     Note that a separate rsyslog script will need to be written to write the
-    incoming syslog messages to file."""
+    incoming syslog messages to file. It is suggested that it filters based on
+    the configured tag."""
     handler = SysLogHandler(address="/dev/log", facility=facility)
-    common_logging(handler, log_level, NO_TIME_FORMAT)
+    syslog_format = logging.formatter(NO_TIME_FORMAT_STRING.format(tag=tag)
+    common_logging(handler, log_level, syslog_format)
 
 
 def common_logging(handler, log_level, log_format):
