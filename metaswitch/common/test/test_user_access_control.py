@@ -6,7 +6,6 @@
 # Metaswitch Networks in a separate written agreement.
 
 import unittest
-import re
 import mock
 import syslog
 from metaswitch.common.user_access_control import (audit_log,
