@@ -28,7 +28,7 @@ class UACTestCase(unittest.TestCase):
 
     @mock.patch('os.getenv')
     @mock.patch('subprocess.check_output')
-    def testGetUserName(self, mock_subprocess, mock_getenv):
+    def testGetUserNameEnv(self, mock_subprocess, mock_getenv):
         """Test that can use env variable for username as fallback."""
 
         # Return an empty string from the who am i process
