@@ -9,7 +9,7 @@ CLEAN_SRC_DIR = .
 COVERAGE_EXCL = **/test/**,metaswitch/common/alarms_writer.py,metaswitch/common/alarms_to_dita.py,metaswitch/common/alarms_to_csv.py,metaswitch/common/stats_to_dita.py,metaswitch/common/generate_stats_csv.py,metaswitch/common/mib.py
 COVERAGE_SRC_DIR = metaswitch
 FLAKE8_INCLUDE_DIR = metaswitch/
-BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,.wheelhouse
+BANDIT_EXCLUDE_LIST = metaswitch/common/test,build,_env,eggs,.wheelhouse
 include build-infra/python.mk
 
 # The build has been seen to fail on Mac OSX when trying to build on i386. Enable this to build for x86_64 only
