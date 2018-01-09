@@ -153,8 +153,10 @@ def delete_if_exists(fn): # pragma: no cover
     except OSError:
         pass
 
+# SIP digest authentication uses md5 instead of more secure hash algorithms.
+# Leave out this function from Bandit security analysis.
 def md5(s): # pragma: no cover
-    digest = hashlib.md5()
+    digest = hashlib.md5() # nosec
     digest.update(s)
     return digest.hexdigest()
 
