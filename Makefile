@@ -34,11 +34,11 @@ python_common_SOURCES = $(shell find metaswitch -type f -not -name "*.pyc") libc
 $(eval $(call python_component,python_common))
 
 # Target for building a wheel from this package into the specified wheelhouse
+# python-common's setup.py depends on cffi, so we need to actually install
+# downloaded wheels before we can build python-common
 .PHONY: build_common_wheel
 build_common_wheel: ${ENV_DIR}/.python_common-install-wheels libclearwaterutils.a
 	$(COMPILER_FLAGS) ${PYTHON} setup.py bdist_wheel -d ${WHEELHOUSE}
-
-# python-common's setup.py depends on cffi, so we need to actually install downloaded wheels before we can
 
 VPATH = cpp-common/src:cpp-common/include
 
