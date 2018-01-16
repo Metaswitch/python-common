@@ -27,7 +27,7 @@ help:
 python_common_SETUP = setup.py
 python_common_TEST_SETUP = setup.py
 python_common_REQUIREMENTS = requirements.txt
-python_common_TEST_REQUIREMENTS = requirements.txt requirements-test.txt
+python_common_TEST_REQUIREMENTS = requirements-test.txt
 python_common_FLAGS = LIBRARY_PATH=. CC="${CC} -Icpp-common/include"
 python_common_SOURCES = $(shell find metaswitch -type f -not -name "*.pyc") libclearwaterutils.a
 $(eval $(call python_component,python_common))
