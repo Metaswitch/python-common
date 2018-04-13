@@ -284,6 +284,7 @@ def merge_csv_with_mibs(parsed_csv, parsed_mibs):
             merged_data.append(merge_entry(key, mib_data, csv_data))
         except KeyError:
             logger.warning("Missing MIB value for key %s", key)
+            print len(parsed_mibs)
 
     for key in parsed_mibs:
         logger.warning("Missing CSV value for key %s", key)
@@ -308,9 +309,15 @@ def write_csv(merged_entries, output_file, cw_mode):
 
     for entry in merged_entries:
         if cw_mode == 'CC':
-            # Clearwater Core mode - ignore bono and gemini
-            if entry[field_index].startswith("bono") or \
-                                       entry[field_index].startswith("gemini"):
+            # Clearwater Core mode - ignore PC-specific files
+            if entry[field_index].startswith(("bono", 
+                                              "gemini",
+                                              "sproutHomer",
+                                              "sproutBGCF",
+                                              "sproutMMTel",
+                                              "cdiv",
+                                              "memento"
+                                             )):
                 logger.debug("Ignoring entry Project Clearwater entry %s",
                              entry[2])
                 continue
